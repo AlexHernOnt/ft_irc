@@ -6,7 +6,7 @@
 /*   By: ahernand <ahernand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/04/06 17:41:26 by ahernand         ###   ########.fr       */
+/*   Updated: 2023/04/06 18:11:04 by ahernand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,8 +87,6 @@ int main(int argc, char const* argv[])
 	{
 		valread = read(new_socket, buffer, 1024);
 		printf("%s\n", buffer);
-
-
 	}
 	printf("A\n");
 
