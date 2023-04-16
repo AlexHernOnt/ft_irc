@@ -5,5 +5,6 @@
         "iosfwd": "c",
         "string": "cpp",
         "filesystem": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

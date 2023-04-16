@@ -6,7 +6,7 @@
 /*   By: ahernand <ahernand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/04/06 18:11:04 by ahernand         ###   ########.fr       */
+/*   Updated: 2023/04/16 17:37:28 by ahernand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,6 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-
-
 // Server side C/C++ program to demonstrate Socket
 // programming
 #include <netinet/in.h>
@@ -25,41 +23,47 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <sys/poll.h>
+
 #define PORT 8080
 
 int main(int argc, char const* argv[])
 {
-	int server_fd, new_socket, valread;
-	struct sockaddr_in address;
-	int opt = 1;
-	int addrlen = sizeof(address);
-	char buffer[1024] = { 0 };
-	const char* hello = "Hello from server";
-  
+	int						server_fd, new_socket, valread;
+	struct sockaddr_in		address;
+	int						opt = 1;
+	int						addrlen = sizeof(address);
+	char					buffer[1024];
+	struct pollfd			pfds[1024];
+	int						numOfConnections = 0;
+	const char*				hello = "Server: Hello!\n";
+
+
+
+
+
+
+
+
+	/*
+	**	Setting Up Server
+	*/
+
+
 	// Creating socket
 	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		perror("socket failed");
 		exit(EXIT_FAILURE);
 	}
-	
-	
-	
-	
-	
+
 	// Forcefully attaching socket to the port 8080
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR , &opt, sizeof(opt)))
 	{
 		perror("setsockopt");
 		exit(EXIT_FAILURE);
 	}
- 
- 
- 
- 
- 
- 
- 
+
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons(PORT);
@@ -77,39 +81,93 @@ int main(int argc, char const* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	if ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0)
+
+
+
+
+
+
+
+	/*
+	**	Setting Up Pull
+	*/
+
+
+	for(int i = 0; i < 1024; i++)
 	{
-		perror("accept");
-		exit(EXIT_FAILURE);
+		pfds[i].fd = -1;
+		pfds[i].events = POLLIN;
 	}
+
+
+	std::fill_n(buffer, 1024, 0);
+
+
+
+
+
+
+
+
+	/*
+	**	Server start
+	*/
+
 
 	while (42)
 	{
-		valread = read(new_socket, buffer, 1024);
-		printf("%s\n", buffer);
+		// Mirar si hay nueva conexion
+		new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
+
+		if (new_socket != -1)
+		{
+			for (int i = 0; i < 1024; i++)
+			{
+				if (pfds[i].fd == new_socket)
+					break;
+				if (pfds[i].fd == -1)
+				{
+					pfds[i].fd = new_socket;
+					write(1, "New connection\n", 15);
+					send(new_socket, hello, strlen(hello), 0);
+					numOfConnections++;
+					break;
+				}
+			}
+		}
+		poll(pfds, numOfConnections, -1);
+		//comprobar todas las conexiones
+		for (int i = 0; i < numOfConnections; i++)
+        {
+			if (pfds[i].fd == -1)
+				break;
+			if (pfds[i].revents & POLLIN)
+			{
+				valread = read(pfds[i].fd, buffer, 1024);
+				if (valread > 0)
+				{
+					write(1, buffer, valread);
+					std::fill_n(buffer, 1024, 0);
+				}
+				else
+				{
+					write(1, "stdin closed\n", 13);
+				}
+			}
+		}
 	}
-	printf("A\n");
 
-
-
-
-	
-	
-	
-	
 	send(new_socket, hello, strlen(hello), 0);
 	printf("Message sent\n");
-  
 
-
-
-  
 	// closing the connected socket
 	close(new_socket);
 	// closing the listening socket
 	shutdown(server_fd, SHUT_RDWR);
 	return 0;
 }
+
+
 
 
 
