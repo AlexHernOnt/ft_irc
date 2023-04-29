@@ -6,7 +6,7 @@
 #    By: ahernand <ahernand@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/04/08 16:49:07 by ahernand          #+#    #+#              #
-#    Updated: 2023/04/08 17:44:12 by ahernand         ###   ########.fr        #
+#    Updated: 2023/04/29 15:51:40 by ahernand         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,9 +16,9 @@ CXX = clang++
 
 CPPFLAGS = -std=c++98 # -Wall -Wextra -Werrors
 
-SRCS =	main.cpp #client.cpp
+SRCS =	srcs/server.cpp #client.cpp
 
-OBJS = main.o
+OBJS = srcs/server.o
 		
 all : $(NAME)
 
