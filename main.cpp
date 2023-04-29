@@ -6,7 +6,7 @@
 /*   By: ahernand <ahernand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/04/23 20:07:05 by ahernand         ###   ########.fr       */
+/*   Updated: 2023/04/29 15:20:41 by ahernand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 #include <netinet/in.h> 
 #include <sys/time.h>		//FD_SET, FD_ISSET, FD_ZERO macros 
 #include <iostream>
-
+#include <vector>
 
 #define TRUE	1
 #define FALSE	0
@@ -33,21 +33,22 @@
 	 
 int main(int argc , char *argv[])  
 {  
-	int						opt = TRUE;
-	int						master_socket;
-	int						addrlen;
-	int						new_socket;
-	int						client_socket[30];
-	int						max_clients = 30;
-	int						activity;
-	int						i;
-	int						valread;
-	int						sd;
-	int						max_sd;
-	struct sockaddr_in		address;
+	int							opt = TRUE;
+	int							master_socket;
+	int							addrlen;
+	int							new_socket;
+	int							client_socket[30];
+	std::vector<std::string>	names;
+	int							max_clients = 30;
+	int							activity;
+	int							i;
+	int							valread;
+	int							sd;
+	int							max_sd;
+	struct sockaddr_in			address;
 
-	char					buffer[1025];  //data buffer of 1K 
-	char					*message = "Server: Welcome client!\n";  
+	char						buffer[1025];  //data buffer of 1K 
+	const char					*message = "Server: Welcome client!\n";  
 
 
 
@@ -173,6 +174,8 @@ int main(int argc , char *argv[])
 
 			//inform user of socket number - used in send and receive commands 
 			printf("New connection , socket fd is %d , ip is : %s , port : %d\n", new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
+			names.push_back("Client " + std::to_string(new_socket));
+
 
 			//send new connection greeting message
 			if (send(new_socket, message, strlen(message), 0) != strlen(message))
@@ -246,6 +249,18 @@ int main(int argc , char *argv[])
 					//of the data read
 				
 					buffer[valread] = '\0';
+                    for (int j = 0; j < max_clients; ++j)
+					{
+						if (client_socket[j] != sd)
+						{
+							const char *aux = names[j].c_str();
+							
+							send(client_socket[j] , aux, names[j].length(), 0 );
+							send(client_socket[j] , ": ", 2, 0 );
+							send(client_socket[j] , buffer , strlen(buffer) , 0 );  
+						}
+					}
+						
 					printf("%s", buffer);
 					std::fill_n(buffer, 1024, 0);
 				
@@ -254,7 +269,6 @@ int main(int argc , char *argv[])
 			}
 		}
 	}
-
 	return 0;
 }
 
