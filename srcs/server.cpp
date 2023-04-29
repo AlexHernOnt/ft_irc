@@ -32,6 +32,11 @@
 #define PORT	8888 
 	 
 struct server_data {
+	server_data()
+		: password(""), port(8888) {}
+	server_data(std::string password, int port)
+        : password(password), port(port) {}
+
   	std::string password;
   	int port;
 };
@@ -47,6 +52,7 @@ struct client_data {
 
 int main(int argc , char *argv[])  
 {  
+	server_data					server;
 	int							opt = TRUE;
 	int							master_socket;
 	int							addrlen;
@@ -66,6 +72,8 @@ int main(int argc , char *argv[])
 
 
 
+	//new server info
+	server = server_data();
 
 	//set of socket descriptors 
 	fd_set readfds;  
