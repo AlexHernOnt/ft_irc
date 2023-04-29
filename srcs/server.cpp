@@ -6,7 +6,7 @@
 /*   By: ahernand <ahernand@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/04/29 15:52:10 by ahernand         ###   ########.fr       */
+/*   Updated: 2023/04/29 16:45:31 by ahernand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 #include <netinet/in.h> 
 #include <sys/time.h>		//FD_SET, FD_ISSET, FD_ZERO macros 
 #include <iostream>
-#include <vector>
+#include <map>
 
 #define TRUE	1
 #define FALSE	0
@@ -38,7 +38,7 @@ int main(int argc , char *argv[])
 	int							addrlen;
 	int							new_socket;
 	int							client_socket[30];
-	std::vector<std::string>	names;
+	std::map<int, std::string>	names;
 	int							max_clients = 30;
 	int							activity;
 	int							i;
@@ -166,7 +166,7 @@ int main(int argc , char *argv[])
 
 			//inform user of socket number - used in send and receive commands 
 			printf("New connection , socket fd is %d , ip is : %s , port : %d\n", new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
-			names.push_back("Client " + std::to_string(new_socket));
+			names.insert(std::pair<int, std::string>(new_socket, "Client " + std::to_string(new_socket)));
 
 
 			//send new connection greeting message
@@ -239,23 +239,23 @@ int main(int argc , char *argv[])
 				{
 					//set the string  terminating NULL byte on the end
 					//of the data read
-				
+
 					buffer[valread] = '\0';
                     for (int j = 0; j < max_clients; ++j)
 					{
 						if (client_socket[j] != sd)
 						{
-							const char *aux = names[j].c_str();
-							
-							send(client_socket[j] , aux, names[j].length(), 0 );
-							send(client_socket[j] , ": ", 2, 0 );
-							send(client_socket[j] , buffer , strlen(buffer) , 0 );  
+							const char *aux = names.find(sd)->second.c_str();
+
+							send(client_socket[j] , aux, strlen(aux), 0);
+							send(client_socket[j] , ": ", 2, 0);
+							send(client_socket[j] , buffer , strlen(buffer), 0);  
 						}
 					}
 						
 					printf("%s", buffer);
 					std::fill_n(buffer, 1024, 0);
-				
+
 					// send(sd , buffer , strlen(buffer) , 0 );
 				}
 			}
@@ -263,9 +263,6 @@ int main(int argc , char *argv[])
 	}
 	return 0;
 }
-
-
-
 
 
 
