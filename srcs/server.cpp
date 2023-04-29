@@ -31,6 +31,15 @@
 #define FALSE	0
 #define PORT	8888 
 	 
+struct {
+  std::string password;
+  int port;
+} server_data;
+
+struct {
+  std::string name;
+} client_data;
+
 int main(int argc , char *argv[])  
 {  
 	int							opt = TRUE;
@@ -38,7 +47,7 @@ int main(int argc , char *argv[])
 	int							addrlen;
 	int							new_socket;
 	int							client_socket[30];
-	std::map<int, std::string>	names;
+	std::map<int, client_data>	names;
 	int							max_clients = 30;
 	int							activity;
 	int							i;
