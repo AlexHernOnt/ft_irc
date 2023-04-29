@@ -31,14 +31,19 @@
 #define FALSE	0
 #define PORT	8888 
 	 
-struct {
-  std::string password;
-  int port;
-} server_data;
+struct server_data {
+  	std::string password;
+  	int port;
+};
 
-struct {
-  std::string name;
-} client_data;
+struct client_data {
+	client_data()
+		: name("Cliente") {}
+	client_data(std::string newName)
+        : name(newName) {}
+
+  	std::string name;
+};
 
 int main(int argc , char *argv[])  
 {  
@@ -47,7 +52,7 @@ int main(int argc , char *argv[])
 	int							addrlen;
 	int							new_socket;
 	int							client_socket[30];
-	std::map<int, client_data>	names;
+	std::map<int, client_data>	client_list;	//<socket_fd , client_data>
 	int							max_clients = 30;
 	int							activity;
 	int							i;
@@ -175,7 +180,7 @@ int main(int argc , char *argv[])
 
 			//inform user of socket number - used in send and receive commands 
 			printf("New connection , socket fd is %d , ip is : %s , port : %d\n", new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
-			names.insert(std::pair<int, std::string>(new_socket, "Client " + std::to_string(new_socket)));
+			client_list.insert(std::pair<int, client_data>(new_socket, client_data("Client " + std::to_string(new_socket))));
 
 
 			//send new connection greeting message
@@ -254,11 +259,10 @@ int main(int argc , char *argv[])
 					{
 						if (client_socket[j] != sd)
 						{
-							const char *aux = names.find(sd)->second.c_str();
+							std::string message = client_list.find(sd)->second.name + ": " + buffer;
+							const char *aux = message.c_str();
 
-							send(client_socket[j] , aux, strlen(aux), 0);
-							send(client_socket[j] , ": ", 2, 0);
-							send(client_socket[j] , buffer , strlen(buffer), 0);  
+							send(client_socket[j] , aux , strlen(aux), 0);
 						}
 					}
 						
