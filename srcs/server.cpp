@@ -73,7 +73,6 @@ int main(int argc , char *argv[])
 	server_data							server;
 	int									master_socket;
 	int									addrlen;
-	int									client_socket[30];
 	std::map<int, client_data>			client_list;			//<fd , client_data>
 	int									max_sd;
 	struct sockaddr_in					address;
@@ -93,12 +92,6 @@ int main(int argc , char *argv[])
 
 	// Set of socket descriptors 
 	fd_set readfds;  
-
-	// Initialise all client_socket[] to 0 so not checked 
-	for (int i = 0; i < server.max_clients; i++)  
-	{  
-		client_socket[i] = 0;  
-	}
 
 	// Create a master socket 
 	if ((master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0)
@@ -176,10 +169,10 @@ int main(int argc , char *argv[])
 		max_sd = master_socket;
 
 		// Add child sockets to set
-		for (int i = 0 ; i < server.max_clients; i++)
+		for (std::map<int, client_data>::iterator i = client_list.begin(); i != client_list.end(); std::advance(i, 1))
 		{
 			// Socket descriptor
-			sd = client_socket[i];
+			sd = i->first;
 
 			// If valid socket descriptor then add to read list
 			if (sd > 0)
@@ -222,19 +215,14 @@ int main(int argc , char *argv[])
 			std::puts("Welcome message sent successfully");
 
 			//add new socket to array of sockets
-			for (int i = 0; i < server.max_clients; i++)
+			//if position is not taken
+			if(client_list.find(new_socket) == client_list.end())
 			{
-				//if position is empty
-				if( client_socket[i] == 0)
-				{
-					client_socket[i] = new_socket;
+				// Creates a user in the map.
+				client_list.insert(std::pair<int, client_data>(new_socket, client_data("Client " + std::to_string(new_socket))));
+				std::printf("Adding to list of sockets\n");
 
-					// Creates a user in the map.
-					client_list.insert(std::pair<int, client_data>(new_socket, client_data("Client " + std::to_string(new_socket))));
-					std::printf("Adding to list of sockets as %d\n" , i);
-
-					break;
-				}
+				break;
 			}
 		}
 
@@ -259,9 +247,9 @@ int main(int argc , char *argv[])
 		int									sd;
 
 		//else its some IO operation on some other socket
-		for (int i = 0;i < server.max_clients; i++)
+		for (std::map<int, client_data>::iterator i = client_list.begin(); i != client_list.end(); std::advance(i, 1))
 		{
-			sd = client_socket[i];
+			sd = i->first;
 
 			if (FD_ISSET(sd , &readfds))
 			{
@@ -272,7 +260,7 @@ int main(int argc , char *argv[])
 
 					//Close the socket and mark as 0 in list for reuse
 					close (sd);
-					client_socket[i] = 0;
+					client_list.erase(i);
 				}
 				else
 				{
@@ -298,16 +286,16 @@ int main(int argc , char *argv[])
 					else
 					{
 						// Send message to every client
-						for (int j = 0; j < server.max_clients; ++j)
+						for (std::map<int, client_data>::iterator j = client_list.begin(); j != client_list.end(); std::advance(j, 1))
 						{
-							if (client_socket[j] != sd)
+							if (j->first != sd)
 							{
 								std::string message = client_list.find(sd)->second.name + ": " + buffer;
 								const char *aux = message.c_str();
-								send(client_socket[j], aux ,strlen(aux), 0);
+								send(j->first, aux ,strlen(aux), 0);
 							}
 						}
-						std::printf("%s", buffer);
+						//std::printf("%s", buffer);
 					}
 
 					std::fill_n(buffer, 1024, 0);
