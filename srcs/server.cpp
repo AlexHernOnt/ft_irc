@@ -45,12 +45,11 @@ struct server_data {
 
 struct client_data {
 	client_data()
-		: name("Cliente"), fd(0) {}
-	client_data(std::string newName, int fd)
-        : name(newName), fd(fd) {}
+		: name("Cliente") {}
+	client_data(std::string newName)
+        : name(newName) {}
 
   	std::string	name;
-	int			fd;
 	
 	//room?
 	//password set?
@@ -64,7 +63,7 @@ int main(int argc , char *argv[])
 	int									addrlen;
 	int									new_socket;
 	int									client_socket[30];
-	std::map<std::string, client_data>	client_list;	//<nick , client_data>
+	std::map<int, client_data>	client_list;	//<fd , client_data>
 	int									activity;
 	int									i;
 	int									valread;
@@ -193,7 +192,7 @@ int main(int argc , char *argv[])
 
 			//inform user of socket number - used in send and receive commands 
 			printf("New connection , socket fd is %d , ip is : %s , port : %d\n", new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
-			client_list.insert(std::pair<std::string, client_data>("Nick " + std::to_string(new_socket), client_data("Client " + std::to_string(new_socket), new_socket)));
+			client_list.insert(std::pair<int, client_data>(new_socket, client_data("Client " + std::to_string(new_socket))));
 
 
 			//send new connection greeting message
