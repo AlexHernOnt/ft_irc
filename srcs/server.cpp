@@ -29,46 +29,51 @@
 
 #define TRUE	1
 #define FALSE	0
-#define PORT	8888 
+#define PORT	6667 
 	 
 struct server_data {
 	server_data()
-		: password(""), port(8888) {}
+		: password(""), port(PORT), max_clients(30) {}
 	server_data(std::string password, int port)
         : password(password), port(port) {}
 
-  	std::string password;
-  	int port;
+	//server properties
+  	std::string	password;
+  	int			port;
+	int			max_clients;
 };
 
 struct client_data {
 	client_data()
-		: name("Cliente") {}
-	client_data(std::string newName)
-        : name(newName) {}
+		: name("Cliente"), fd(0) {}
+	client_data(std::string newName, int fd)
+        : name(newName), fd(fd) {}
 
-  	std::string name;
+  	std::string	name;
+	int			fd;
+	
+	//room?
+	//password set?
 };
 
 int main(int argc , char *argv[])  
 {  
-	server_data					server;
-	int							opt = TRUE;
-	int							master_socket;
-	int							addrlen;
-	int							new_socket;
-	int							client_socket[30];
-	std::map<int, client_data>	client_list;	//<socket_fd , client_data>
-	int							max_clients = 30;
-	int							activity;
-	int							i;
-	int							valread;
-	int							sd;
-	int							max_sd;
-	struct sockaddr_in			address;
+	server_data							server;
+	int									opt = TRUE;
+	int									master_socket;
+	int									addrlen;
+	int									new_socket;
+	int									client_socket[30];
+	std::map<std::string, client_data>	client_list;	//<nick , client_data>
+	int									activity;
+	int									i;
+	int									valread;
+	int									sd;
+	int									max_sd;
+	struct sockaddr_in					address;
 
-	char						buffer[1025];  //data buffer of 1K 
-	const char					*message = "Server: Welcome client!\n";  
+	char								buffer[1025];  //data buffer of 1K 
+	const char							*message = "Server: Welcome client!\n";  
 
 
 
@@ -79,7 +84,7 @@ int main(int argc , char *argv[])
 	fd_set readfds;  
 
 	//initialise all client_socket[] to 0 so not checked 
-	for (i = 0; i < max_clients; i++)  
+	for (i = 0; i < server.max_clients; i++)  
 	{  
 		client_socket[i] = 0;  
 	}
@@ -105,7 +110,7 @@ int main(int argc , char *argv[])
 	address.sin_addr.s_addr = INADDR_ANY;  
 	address.sin_port = htons(PORT);  
 
-	//bind the socket to localhost port 8888 
+	//bind the socket to localhost port 6667 
 	if (bind(master_socket, (struct sockaddr *)&address, sizeof(address)) < 0)  
 	{  
 		perror("bind failed");  
@@ -152,7 +157,7 @@ int main(int argc , char *argv[])
 		max_sd = master_socket;  
 			 
 		//add child sockets to set 
-		for ( i = 0 ; i < max_clients ; i++)  
+		for ( i = 0 ; i < server.max_clients ; i++)  
 		{  
 			//socket descriptor 
 			sd = client_socket[i];  
@@ -188,7 +193,7 @@ int main(int argc , char *argv[])
 
 			//inform user of socket number - used in send and receive commands 
 			printf("New connection , socket fd is %d , ip is : %s , port : %d\n", new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
-			client_list.insert(std::pair<int, client_data>(new_socket, client_data("Client " + std::to_string(new_socket))));
+			client_list.insert(std::pair<std::string, client_data>("Nick " + std::to_string(new_socket), client_data("Client " + std::to_string(new_socket), new_socket)));
 
 
 			//send new connection greeting message
@@ -200,7 +205,7 @@ int main(int argc , char *argv[])
 			puts("Welcome message sent successfully");
 
 			//add new socket to array of sockets
-			for (i = 0; i < max_clients; i++)
+			for (i = 0; i < server.max_clients; i++)
 			{
 				//if position is empty 
 				if( client_socket[i] == 0 )  
@@ -235,7 +240,7 @@ int main(int argc , char *argv[])
 		*/
 
 		//else its some IO operation on some other socket
-		for (i = 0; i < max_clients; i++)  
+		for (i = 0; i < server.max_clients; i++)  
 		{  
 			sd = client_socket[i];  
 				 
@@ -263,7 +268,7 @@ int main(int argc , char *argv[])
 					//of the data read
 
 					buffer[valread] = '\0';
-                    for (int j = 0; j < max_clients; ++j)
+                    for (int j = 0; j < server.max_clients; ++j)
 					{
 						if (client_socket[j] != sd)
 						{
