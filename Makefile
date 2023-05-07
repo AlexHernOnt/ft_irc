@@ -14,11 +14,11 @@ NAME = ft_irc
 
 CXX = clang++ 
 
-CPPFLAGS = -std=c++98 # -Wall -Wextra -Werrors
+CPPFLAGS = -std=c++98 -Wall -Wextra -Werror
 
-SRCS =	srcs/server.cpp #client.cpp
+SRCS =	srcs/main.cpp srcs/server.cpp #client.cpp
 
-OBJS = srcs/server.o
+OBJS = srcs/main.o srcs/server.o
 		
 all : $(NAME)
 
