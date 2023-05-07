@@ -16,9 +16,9 @@ CXX = clang++
 
 CPPFLAGS = -std=c++98 -Wall -Wextra -Werror
 
-SRCS =	srcs/main.cpp srcs/server.cpp #client.cpp
+SRCS =	srcs/main.cpp srcs/server.cpp srcs/commands/join.cpp #client.cpp
 
-OBJS = srcs/main.o srcs/server.o
+OBJS = srcs/main.o srcs/server.o srcs/commands/join.o
 		
 all : $(NAME)
 

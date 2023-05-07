@@ -34,6 +34,8 @@ struct client_data{
 	bool			disconnected;
 };
 
+typedef void (*CommFunct)(std::string);
+
 class Server {
     public:
         Server( void );
@@ -48,6 +50,10 @@ class Server {
         void CheckOperations( void );
 
         //functions
+        void ProcessCommand( std::string line );
+
+        //commands
+        void Command_join( std::string data );
     private:
         //server properties
         std::string	                password;
@@ -61,8 +67,11 @@ class Server {
 
         // Set of socket descriptors 
 	    fd_set                      readfds;
-        int                         max_sd;
-        int							activity;
+
+        //others
+        int                              max_sd;
+        int							     activity;
+        std::map<std::string, CommFunct> command_map;
 };
 
 #endif

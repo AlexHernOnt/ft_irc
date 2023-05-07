@@ -17,6 +17,8 @@ Server::Server( void )
 	password = DEFAULT_PASSWORD;
 	port = DEFAULT_PORT;
 	max_clients = 30;
+
+	command_map["JOIN"] = &Server::Command_join;
 }
 
 Server::~Server( void )
@@ -30,7 +32,7 @@ Server::Server( const Server& other )
 
 void Server::ServerSocketSetup( void )
 {
-	int									opt = TRUE;
+	int opt = TRUE;
 
 	// Create a master socket 
 	if ((master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0)
@@ -68,7 +70,7 @@ void Server::ServerSocketSetup( void )
 		exit(EXIT_FAILURE);
 	}
 
-	std::puts("Waiting for connections ...");
+	std::cout << "Waiting for connections ..." << std::endl;
 }
 
 void Server::CheckConnections( void )
@@ -126,7 +128,7 @@ void Server::CheckConnections( void )
 			std::perror("send");
 		}
 
-		std::puts("Welcome message sent successfully");
+		std::cout << "Welcome message sent successfully" << std::endl;
 
 		//add new socket to array of sockets
 		//if position is not taken or if it's disconnected
@@ -184,8 +186,10 @@ void Server::CheckOperations( void )
 				}
 				else
 				{
+					std::string buffer_str = buffer;
+					ProcessCommand(buffer_str);
 					// Send message to every client
-					for (std::map<int, client_data>::iterator j = client_list.begin(); j != client_list.end(); std::advance(j, 1))
+					/*for (std::map<int, client_data>::iterator j = client_list.begin(); j != client_list.end(); std::advance(j, 1))
 					{
 						if (j->first != client_sd)
 						{
@@ -193,7 +197,7 @@ void Server::CheckOperations( void )
 							const char *aux = message.c_str();
 							send(j->first, aux ,strlen(aux), 0);
 						}
-					}
+					}*/
 					//std::cout << buffer;
 				}
 
@@ -201,4 +205,14 @@ void Server::CheckOperations( void )
 			}
 		}
 	}
+}
+
+void Server::ProcessCommand( std::string line )
+{
+	line[line.find('\n')] = '\0';
+	std::string command = line.substr(0, line.find(' '));
+
+	
+	std::cout << "COMANDO: " << command << std::endl;
+	std::cout << "DATOS: " << line << std::endl;
 }
