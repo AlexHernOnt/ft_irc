@@ -14,9 +14,11 @@
 
 Server::Server( void )
 {
+	name = DEFAULT_NAME;
 	password = DEFAULT_PASSWORD;
 	port = DEFAULT_PORT;
-	max_clients = 30;
+	timeout = 180000;
+	nfds = 1;
 
 	command_map["JOIN"] = &Server::Command_join;
 }
@@ -32,22 +34,29 @@ Server::Server( const Server& other )
 
 void Server::ServerSocketSetup( void )
 {
-	int opt = TRUE;
+	int rc, opt = 1;
 
 	// Create a master socket 
 	if ((master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0)
 	{  
-		std::perror("socket failed");  
+		std::perror("socket() failed");  
 		exit(EXIT_FAILURE);  
 	}  
 
 	// Set master socket to allow multiple connections , 
 	// This is just a good habit, it will work without this 
-	if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt,
-		sizeof(opt)) < 0)
+	if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0)
 	{
-		std::perror("setsockopt");  
+		std::perror("setsockopt() failed");
+		close(master_socket);  
 		std::exit(EXIT_FAILURE);
+	}
+
+	if ((rc = fcntl(master_socket, F_SETFL, O_NONBLOCK)) < 0)
+	{
+		perror("fcntl() failed");
+		close(master_socket);
+		exit(EXIT_FAILURE);
 	}
 
 	// Type of socket created
@@ -56,170 +65,218 @@ void Server::ServerSocketSetup( void )
 	address.sin_port = htons(port);
 
 	// Bind the socket to localhost port 6667
-	if (bind(master_socket, (struct sockaddr *)&address, sizeof(address)) < 0)
+	if ((rc = bind(master_socket, (struct sockaddr *)&address, sizeof(address))) < 0)
 	{
 		perror("bind failed");
 		exit(EXIT_FAILURE);
 	}
-	std::cout << "Listener on port " << port << std::endl;
 
-	// Ttry to specify maximum of 3 pending connections for the master socket
-	if (listen(master_socket, 3) < 0)
+	// Ttry to specify maximum of MAX_CLIENTS pending connections for the master socket
+	if (listen(master_socket, MAX_CLIENTS) < 0)
 	{
-		perror("listen");
+		perror("listen() failed");
 		exit(EXIT_FAILURE);
 	}
+	memset(fds, 0, sizeof(fds));
+	fds[0].fd = master_socket;
+	fds[0].events = POLLIN;
 
-	std::cout << "Waiting for connections ..." << std::endl;
+	std::cout << "Listener on port " << port << std::endl;
 }
 
-void Server::CheckConnections( void )
+void Server::MainLoop( void )
 {
-	// Clear the socket set
-	FD_ZERO(&readfds);
+	int    len, rc = 1;
+	int    new_sd = -1;
+	int    compress_array = FALSE;
+	int    close_conn;
+	char   buffer[80];
+	
+	int    current_size = 0;
 
-	// Add master socket to set
-	FD_SET(master_socket, &readfds);
-	max_sd = master_socket;
-
-	// Add child sockets to set
-	for (std::map<int, client_data>::iterator i_client = client_list.begin(); i_client != client_list.end(); std::advance(i_client, 1))
+	while (true)
 	{
-		// Socket descriptor
-		int client_sd = i_client->first;
-
-		// If valid socket descriptor then add to read list
-		if (client_sd > 0)
-			FD_SET( client_sd , &readfds);
-
-		// Highest file descriptor number, need it for the select function
-		if (client_sd > max_sd)
-			max_sd = client_sd;
-	}
-
-	// Wait for an activity on one of the sockets , timeout is NULL,
-	// So wait indefinitely
-	activity = select(max_sd + 1 , &readfds , NULL , NULL , NULL);
-
-	if ((activity < 0) && (errno != EINTR))
-	{
-		std::cout << "select error";
-	}
-
-	// If something happened on the master socket , 
-	// then its an incoming connection 
-	if (FD_ISSET(master_socket, &readfds))  
-	{
-		int new_socket;
-		int	addrlen;
-		if ((new_socket = accept(master_socket,
-				(struct sockaddr *) &address, (socklen_t*)&addrlen)) < 0)
-		{  
-			std::perror("accept");  
-			exit(EXIT_FAILURE);  
-		}  
-
-		//inform user of socket number - used in send and receive commands 
-		std::cout << "New connection , socket fd is " << new_socket << ", ip is : " << inet_ntoa(address.sin_addr) << ", port : " << ntohs(address.sin_port) << std::endl;
-
-		//send new connection greeting message
-		if (send(new_socket, "Server: Welcome client!\nPassword: ", 34, 0) != 34)
+		std::cout << "Waiting on poll()..." << std::endl;
+		if ((rc = poll(fds, nfds, timeout)) < 0)
 		{
-			std::perror("send");
+			perror("poll() failed");
+			break;
 		}
 
-		std::cout << "Welcome message sent successfully" << std::endl;
-
-		//add new socket to array of sockets
-		//if position is not taken or if it's disconnected
-		if(client_list.find(new_socket) == client_list.end())
+		if (rc == 0)
 		{
-			// Creates a user in the map.
-			client_list.insert(std::pair<int, client_data>(new_socket, client_data("Client " + std::to_string(new_socket))));
-			std::cout << "Adding to list of clients" << std::endl;
+			std::cout << "  poll() timed out.  End program." << std::endl;
+			break;
 		}
-	}
-}
-
-void Server::CheckOperations( void )
-{
-	char								buffer[1025];			//data buffer of 1K
-	int									valread;
-	int									client_sd;
-
-	//else its some IO operation on some other socket
-	for (std::map<int, client_data>::iterator i_client = client_list.begin(); i_client != client_list.end(); std::advance(i_client, 1))
-	{
-		client_sd = i_client->first;
-
-		if (FD_ISSET(client_sd , &readfds))
+		
+		current_size = nfds;
+		for (int i = 0; i < current_size; i++)
 		{
-			//Check if it was for closing
-			if ((valread = read(client_sd, buffer, 1024)) == 0)
+			/* find POLLIN and determine whether it's the listening  */
+			/* or the active connection.                             */
+			if(fds[i].revents == 0)
+				continue;
+
+			/* If revents is not POLLIN, it's an unexpected result,  */
+			/* log and end the server.                               */
+			if(fds[i].revents != POLLIN)
 			{
-				std::cout << "Client \"" << i_client->second.name.c_str() << "\" disconnected." << std::endl; //Creo que esto es para los clientes? (sobretodo porque el host suele ser el que actua de servidor también)
-
-				//Close the socket
-				close (client_sd);
-				i_client->second.disconnected = true;
+				std::cout << "  Error! revents = " << fds[i].revents << std::endl;
+				return;
 			}
+
+			if (fds[i].fd == master_socket)
+			{
+				std::cout << "Listening socket is readable" << std::endl;
+
+				/* Accept all incoming connections that are            */
+				/* queued up on the listening socket before we         */
+				/* loop back and call poll again.                      */
+				do
+				{
+					/* Accept each incoming connection. If               */
+					/* accept fails with EWOULDBLOCK, then we            */
+					/* have accepted all of them. Any other              */
+					/* failure on accept will cause us to end the        */
+					/* server.                                           */
+					new_sd = accept(master_socket, NULL, NULL);
+					if (new_sd < 0)
+					{
+						if (errno != EWOULDBLOCK)
+						{
+							perror("accept() failed");
+							return;
+						}
+						break;
+					}
+
+					/* Add the new incoming connection to the            */
+					/* pollfd structure                                  */
+					std::cout << "New incoming connection - " << new_sd << std::endl;
+					fds[nfds].fd = new_sd;
+					fds[nfds].events = POLLIN;
+					nfds++;
+
+					/* Loop back up and accept another incoming          */
+					/* connection                                        */
+				} while (new_sd != -1);
+			}
+
+			/* This is not the listening socket, therefore an        */
+			/* existing connection must be readable                  */
 			else
 			{
-				//set the string terminating NULL byte on the end of the data read
+				std::cout << "  Descriptor " << fds[i].fd << " is readable" << std::endl;
+				close_conn = FALSE;
+				/* Receive all incoming data on this socket            */
+				/* before we loop back and call poll again.            */
 
-				buffer[valread] = '\0';
-
-				// if it has not passed the password it can't send shit dude.
-				if (i_client->second.password_passed == false)
+				while (true)
 				{
-					if (valread != 0)
-						buffer[valread - 1] = '\0';
-
-					std::string buff_str = buffer;
-					if (password.compare(buff_str) == 0)
+					/* Receive data on this connection until the         */
+					/* recv fails with EWOULDBLOCK. If any other         */
+					/* failure occurs, we will close the                 */
+					/* connection.                                       */
+					rc = recv(fds[i].fd, buffer, sizeof(buffer), 0);
+					if (rc < 0)
 					{
-						i_client->second.password_passed = true;
-						send(client_sd, "This is the correct password! Please input your ass:\n", 53, 0);
-					}
-					else
-						send(client_sd, "Sorry but this is not the correct password\nPassword: ", 54, 0);
-				}
-				else
-				{
-					std::string buffer_str = buffer;
-					ProcessCommand(buffer_str);
-					// Send message to every client
-					/*for (std::map<int, client_data>::iterator j = client_list.begin(); j != client_list.end(); std::advance(j, 1))
-					{
-						if (j->first != client_sd)
+						if (errno != EWOULDBLOCK)
 						{
-							std::string message = client_list.find(client_sd)->second.name + ": " + buffer;
-							const char *aux = message.c_str();
-							send(j->first, aux ,strlen(aux), 0);
+						perror("  recv() failed");
+						close_conn = TRUE;
 						}
-					}*/
-					//std::cout << buffer;
+						break;
+					}
+
+					/*****************************************************/
+					/* Check to see if the connection has been           */
+					/* closed by the client                              */
+					/*****************************************************/
+					if (rc == 0)
+					{
+						printf("  Connection closed\n");
+						close_conn = TRUE;
+						break;
+					}
+
+					/*****************************************************/
+					/* Data was received                                 */
+					/*****************************************************/
+					len = rc;
+					printf("  %d bytes received\n", len);
+
+					/*****************************************************/
+					/* Echo the data back to the client                  */
+					/*****************************************************/
+					rc = send(fds[i].fd, buffer, len, 0);
+					if (rc < 0)
+					{
+						perror("  send() failed");
+						close_conn = TRUE;
+						break;
+					}
+
 				}
 
-				std::fill_n(buffer, 1024, 0);
+				/*******************************************************/
+				/* If the close_conn flag was turned on, we need       */
+				/* to clean up this active connection. This            */
+				/* clean up process includes removing the              */
+				/* descriptor.                                         */
+				/*******************************************************/
+				if (close_conn)
+				{
+					close(fds[i].fd);
+					fds[i].fd = -1;
+					compress_array = TRUE;
+				}
+			}  /* End of existing connection is readable             */
+		} /* End of loop through pollable descriptors              */
+
+		/* If the compress_array flag was turned on, we need       */
+		/* to squeeze together the array and decrement the number  */
+		/* of file descriptors. We do not need to move back the    */
+		/* events and revents fields because the events will always*/
+		/* be POLLIN in this case, and revents is output.          */
+		if (compress_array)
+		{
+			compress_array = FALSE;
+			for (int i = 0; i < nfds; i++)
+			{
+				if (fds[i].fd == -1)
+				{
+					for (int j = i; j < nfds-1; j++)
+					{
+						fds[j].fd = fds[j+1].fd;
+					}
+					i--;
+					nfds--;
+				}
 			}
 		}
+
+	} /* End of serving running.    */
+}
+
+void Server::Cleanfds( void )
+{
+	for (int i = 0; i < nfds; i++)
+	{
+		if(fds[i].fd >= 0)
+		close(fds[i].fd);
 	}
 }
 
-void Server::ProcessCommand( std::string line )
+void Server::ProcessCommand( int client_sd, std::string line )
 {
 	line[line.find('\n')] = '\0';
 	std::string command = line.substr(0, line.find(' '));
 
 	if (command_map.count(command))
 	{
-		std::cout << "EJECUTANDO: " << command << std::endl;
-
 		CommFunct func = command_map[command];
-		(this->*func)(line);
-		//(command_map[command])(line);
+		(this->*func)(client_sd, line);
 	}
-	std::cout << "COMANDO: " << command << std::endl;
-	std::cout << "DATOS: " << line << std::endl;
+	//std::cout << "COMANDO: " << command << std::endl;
+	//std::cout << "DATOS: " << line << std::endl;
 }

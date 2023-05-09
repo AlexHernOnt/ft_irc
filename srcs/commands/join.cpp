@@ -12,7 +12,7 @@
 
 #include "../server.hpp"
 
-void Server::Command_join( std::string data )
+void Server::Command_join( int client_sd, std::string data )
 {
-    std::cout << "ENTRA AL JOIN CON: " << data << std::endl;
+    std::cout << "ENTRA AL JOIN EL CLIENTE: " << client_list[client_sd].name << " CON LOS SIGUIENTES DATOS: " << data << std::endl;
 }

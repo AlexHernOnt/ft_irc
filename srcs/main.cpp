@@ -18,11 +18,9 @@ int main(/*int argc , char *argv[]*/)
 
     server.ServerSocketSetup();
 
-	while (1)
-	{
-        server.CheckConnections();
-		// Disconnect and read
-        server.CheckOperations();
-	}
+	server.MainLoop();
+
+	server.Cleanfds();
+
 	return 0;
 }
