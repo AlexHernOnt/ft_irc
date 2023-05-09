@@ -212,7 +212,14 @@ void Server::ProcessCommand( std::string line )
 	line[line.find('\n')] = '\0';
 	std::string command = line.substr(0, line.find(' '));
 
-	
+	if (command_map.count(command))
+	{
+		std::cout << "EJECUTANDO: " << command << std::endl;
+
+		CommFunct func = command_map[command];
+		(this->*func)(line);
+		//(command_map[command])(line);
+	}
 	std::cout << "COMANDO: " << command << std::endl;
 	std::cout << "DATOS: " << line << std::endl;
 }

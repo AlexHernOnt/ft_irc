@@ -34,9 +34,12 @@ struct client_data{
 	bool			disconnected;
 };
 
-typedef void (*CommFunct)(std::string);
+
 
 class Server {
+    
+    typedef void (Server::*CommFunct)(std::string);
+
     public:
         Server( void );
         ~Server( void );

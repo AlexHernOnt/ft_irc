@@ -14,5 +14,5 @@
 
 void Server::Command_join( std::string data )
 {
-    data = "";
+    std::cout << "ENTRA AL JOIN CON: " << data << std::endl;
 }
