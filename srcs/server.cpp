@@ -17,7 +17,6 @@ Server::Server( void )
 	name = DEFAULT_NAME;
 	password = DEFAULT_PASSWORD;
 	port = DEFAULT_PORT;
-	timeout = 180000;
 	nfds = 1;
 
 	command_map["JOIN"] = &Server::Command_join;
@@ -87,17 +86,17 @@ void Server::ServerSocketSetup( void )
 void Server::MainLoop( void )
 {
 	int    len, rc = 1;
-	int    new_sd = -1;
+	int    new_socket = -1;
 	int    compress_array = FALSE;
-	int    close_conn;
-	char   buffer[80];
+	bool   close_conn;
+	char   buffer[1024];
 	
 	int    current_size = 0;
 
 	while (true)
 	{
 		std::cout << "Waiting on poll()..." << std::endl;
-		if ((rc = poll(fds, nfds, timeout)) < 0)
+		if ((rc = poll(fds, nfds, -1)) < 0)
 		{
 			perror("poll() failed");
 			break;
@@ -105,42 +104,34 @@ void Server::MainLoop( void )
 
 		if (rc == 0)
 		{
-			std::cout << "  poll() timed out.  End program." << std::endl;
+			std::cout << "poll() timed out.  End program." << std::endl;
 			break;
 		}
 		
 		current_size = nfds;
 		for (int i = 0; i < current_size; i++)
 		{
-			/* find POLLIN and determine whether it's the listening  */
-			/* or the active connection.                             */
 			if(fds[i].revents == 0)
 				continue;
 
-			/* If revents is not POLLIN, it's an unexpected result,  */
-			/* log and end the server.                               */
 			if(fds[i].revents != POLLIN)
 			{
-				std::cout << "  Error! revents = " << fds[i].revents << std::endl;
-				return;
+				/*std::cout << "Error: revents = " << fds[i].revents << std::endl;
+				return;*/
+				std::cout << "User " << client_list[i].name << " quitted unexpectedly." << std::endl << "Revents: " << fds[i].revents << std::endl;
+				client_list.erase(fds[i].fd);
+				close(fds[i].fd);
+				fds[i].fd = -1;
+				compress_array = TRUE;
+				continue;
 			}
 
 			if (fds[i].fd == master_socket)
 			{
 				std::cout << "Listening socket is readable" << std::endl;
-
-				/* Accept all incoming connections that are            */
-				/* queued up on the listening socket before we         */
-				/* loop back and call poll again.                      */
 				do
 				{
-					/* Accept each incoming connection. If               */
-					/* accept fails with EWOULDBLOCK, then we            */
-					/* have accepted all of them. Any other              */
-					/* failure on accept will cause us to end the        */
-					/* server.                                           */
-					new_sd = accept(master_socket, NULL, NULL);
-					if (new_sd < 0)
+					if ((new_socket = accept(master_socket, NULL, NULL)) < 0)
 					{
 						if (errno != EWOULDBLOCK)
 						{
@@ -149,113 +140,82 @@ void Server::MainLoop( void )
 						}
 						break;
 					}
-
-					/* Add the new incoming connection to the            */
-					/* pollfd structure                                  */
-					std::cout << "New incoming connection - " << new_sd << std::endl;
-					fds[nfds].fd = new_sd;
+					client_list.insert(std::pair<int, client_data>(new_socket, client_data("Client " + std::to_string(new_socket))));
+					std::cout << "New incoming connection - " << client_list[new_socket].name << std::endl;
+					fds[nfds].fd = new_socket;
 					fds[nfds].events = POLLIN;
 					nfds++;
-
-					/* Loop back up and accept another incoming          */
-					/* connection                                        */
-				} while (new_sd != -1);
+				} while (new_socket != -1);
 			}
-
-			/* This is not the listening socket, therefore an        */
-			/* existing connection must be readable                  */
 			else
 			{
-				std::cout << "  Descriptor " << fds[i].fd << " is readable" << std::endl;
+				std::cout << "Descriptor " << fds[i].fd << " is readable" << std::endl;
 				close_conn = FALSE;
-				/* Receive all incoming data on this socket            */
-				/* before we loop back and call poll again.            */
 
 				while (true)
 				{
-					/* Receive data on this connection until the         */
-					/* recv fails with EWOULDBLOCK. If any other         */
-					/* failure occurs, we will close the                 */
-					/* connection.                                       */
-					rc = recv(fds[i].fd, buffer, sizeof(buffer), 0);
-					if (rc < 0)
+					if ((len = recv(fds[i].fd, buffer, sizeof(buffer), 0)) < 0)
 					{
 						if (errno != EWOULDBLOCK)
 						{
-						perror("  recv() failed");
-						close_conn = TRUE;
+							perror("recv() failed");
+							close_conn = TRUE;
 						}
 						break;
 					}
 
-					/*****************************************************/
-					/* Check to see if the connection has been           */
-					/* closed by the client                              */
-					/*****************************************************/
-					if (rc == 0)
+					if (len == 0)
 					{
-						printf("  Connection closed\n");
+						std::cout << "Connection closed" << std::endl;
 						close_conn = TRUE;
 						break;
 					}
 
-					/*****************************************************/
-					/* Data was received                                 */
-					/*****************************************************/
-					len = rc;
-					printf("  %d bytes received\n", len);
+					std::cout << len << " bytes received" << std::endl;
+					std::string str_buffer = buffer;
+					ProcessCommand(i, buffer);
 
-					/*****************************************************/
-					/* Echo the data back to the client                  */
-					/*****************************************************/
-					rc = send(fds[i].fd, buffer, len, 0);
-					if (rc < 0)
+					//esto reenvía el mensaje recibido de vuelta
+					/*if ((rc = send(fds[i].fd, buffer, len, 0)) < 0)
 					{
-						perror("  send() failed");
+						perror("send() failed");
 						close_conn = TRUE;
 						break;
-					}
-
+					}*/
 				}
 
-				/*******************************************************/
-				/* If the close_conn flag was turned on, we need       */
-				/* to clean up this active connection. This            */
-				/* clean up process includes removing the              */
-				/* descriptor.                                         */
-				/*******************************************************/
 				if (close_conn)
 				{
+					client_list.erase(fds[i].fd);
 					close(fds[i].fd);
 					fds[i].fd = -1;
 					compress_array = TRUE;
 				}
-			}  /* End of existing connection is readable             */
-		} /* End of loop through pollable descriptors              */
-
-		/* If the compress_array flag was turned on, we need       */
-		/* to squeeze together the array and decrement the number  */
-		/* of file descriptors. We do not need to move back the    */
-		/* events and revents fields because the events will always*/
-		/* be POLLIN in this case, and revents is output.          */
-		if (compress_array)
-		{
-			compress_array = FALSE;
-			for (int i = 0; i < nfds; i++)
-			{
-				if (fds[i].fd == -1)
-				{
-					for (int j = i; j < nfds-1; j++)
-					{
-						fds[j].fd = fds[j+1].fd;
-					}
-					i--;
-					nfds--;
-				}
 			}
 		}
 
-	} /* End of serving running.    */
+		if (compress_array)
+		{
+			compress_array = FALSE;
+			Compressfds();
+		}
+	}
+}
+
+void Server::Compressfds( void )
+{
+	for (int i = 0; i < nfds; i++)
+	{
+		if (fds[i].fd == -1)
+		{
+			for (int j = i; j < nfds - 1; j++)
+			{
+				fds[j].fd = fds[j + 1].fd;
+			}
+			i--;
+			nfds--;
+		}
+	}
 }
 
 void Server::Cleanfds( void )
@@ -266,6 +226,7 @@ void Server::Cleanfds( void )
 		close(fds[i].fd);
 	}
 }
+
 
 void Server::ProcessCommand( int client_sd, std::string line )
 {

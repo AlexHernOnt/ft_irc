@@ -60,6 +60,7 @@ class Server {
         void Cleanfds( void );
         
         //functions
+        void Compressfds( void );
 
         //commands
         void ProcessCommand( int client_sd, std::string line );
@@ -98,7 +99,6 @@ class Server {
         int                              max_sd;
         int							     activity;
         std::map<std::string, CommFunct> command_map;
-        int                              timeout;
 };
 
 #endif
