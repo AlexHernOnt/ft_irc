@@ -25,16 +25,19 @@
 	 
 struct client_data{
 	client_data()
-		: name("Cliente"), password_passed(false), oprtor(false), disconnected(false)  {}
-	client_data(std::string newName)
-        : name(newName), password_passed(false), oprtor(false), disconnected(false) {}
+		: nick("*"), username("*u"), realname("*r"), password_passed(false), oprtor(false), ip_address("127.0.0.1"),disconnected(false)  {}
 
-  	std::string		name;
+  	std::string		nick;
+    std::string     username;
+    std::string     realname;
+
 	bool			password_passed;
     bool            oprtor;
 	
 	//room?
 	//password set?
+
+    std::string     ip_address;
 
 	bool			disconnected;
 };
@@ -61,6 +64,8 @@ class Server {
         
         //functions
         void Compressfds( void );
+        void ServerMsgToClient( int client_sd, std::string msgcode, std::string line );
+        void WelcomeClient( int client_sd );
 
         //commands
         void ProcessCommand( int client_sd, std::string line );
@@ -72,6 +77,7 @@ class Server {
 
         //  other commands
         void Command_oper( int client_sd, std::string data );   //ask for operator privileges
+        void Command_quit( int client_sd, std::string data );   //end connection (client sent message example: "ERROR :Closing Link: 195.55.210.171 (Quit: potato)")
 
         //  channel commands
         void Command_join( int client_sd, std::string data );   //join a channel
@@ -82,7 +88,7 @@ class Server {
         
     private:
         //server properties
-        std::string                 name;
+        std::string                 host_name;
         std::string	                password;
         int			                port;
 

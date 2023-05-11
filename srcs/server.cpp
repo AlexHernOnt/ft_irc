@@ -14,12 +14,14 @@
 
 Server::Server( void )
 {
-	name = DEFAULT_NAME;
+	host_name = DEFAULT_NAME;
 	password = DEFAULT_PASSWORD;
 	port = DEFAULT_PORT;
 	nfds = 1;
 
 	command_map["JOIN"] = &Server::Command_join;
+	command_map["NICK"] = &Server::Command_nick;
+	command_map["USER"] = &Server::Command_user;
 }
 
 Server::~Server( void )
@@ -118,7 +120,7 @@ void Server::MainLoop( void )
 			{
 				/*std::cout << "Error: revents = " << fds[i].revents << std::endl;
 				return;*/
-				std::cout << "User " << client_list[i].name << " quitted unexpectedly." << std::endl << "Revents: " << fds[i].revents << std::endl;
+				std::cout << "User " << client_list[i].nick << " quitted unexpectedly." << std::endl << "Revents: " << fds[i].revents << std::endl;
 				client_list.erase(fds[i].fd);
 				close(fds[i].fd);
 				fds[i].fd = -1;
@@ -131,7 +133,8 @@ void Server::MainLoop( void )
 				std::cout << "Listening socket is readable" << std::endl;
 				do
 				{
-					if ((new_socket = accept(master_socket, NULL, NULL)) < 0)
+					int	addrlen;
+					if ((new_socket = accept(master_socket, (struct sockaddr *) &address, (socklen_t*)&addrlen)) < 0)
 					{
 						if (errno != EWOULDBLOCK)
 						{
@@ -140,8 +143,11 @@ void Server::MainLoop( void )
 						}
 						break;
 					}
-					client_list.insert(std::pair<int, client_data>(new_socket, client_data("Client " + std::to_string(new_socket))));
-					std::cout << "New incoming connection - " << client_list[new_socket].name << std::endl;
+					client_list.insert(std::pair<int, client_data>(new_socket, client_data()));
+					client_list[new_socket].ip_address = inet_ntoa(address.sin_addr);
+
+					ServerMsgToClient( new_socket, "020", "Please wait while we process your connection." );
+					std::cout << "New incoming connection - " << client_list[new_socket].nick << std::endl;
 					fds[nfds].fd = new_socket;
 					fds[nfds].events = POLLIN;
 					nfds++;
@@ -174,14 +180,6 @@ void Server::MainLoop( void )
 					std::cout << len << " bytes received" << std::endl;
 					std::string str_buffer = buffer;
 					ProcessCommand(i, buffer);
-
-					//esto reenvía el mensaje recibido de vuelta
-					/*if ((rc = send(fds[i].fd, buffer, len, 0)) < 0)
-					{
-						perror("send() failed");
-						close_conn = TRUE;
-						break;
-					}*/
 				}
 
 				if (close_conn)
@@ -227,7 +225,6 @@ void Server::Cleanfds( void )
 	}
 }
 
-
 void Server::ProcessCommand( int client_sd, std::string line )
 {
 	line[line.find('\n')] = '\0';
@@ -240,4 +237,11 @@ void Server::ProcessCommand( int client_sd, std::string line )
 	}
 	//std::cout << "COMANDO: " << command << std::endl;
 	//std::cout << "DATOS: " << line << std::endl;
+}
+
+void Server::ServerMsgToClient( int client_sd, std::string msgcode, std::string line )
+{
+	std::string formatted_msg = ":" + host_name + " " + msgcode + " " + client_list[client_sd].nick + " :" + line + "\n";
+	const char* formatted_msg_char = formatted_msg.c_str();
+	send(client_sd, formatted_msg_char, formatted_msg.size(), 0);
 }
