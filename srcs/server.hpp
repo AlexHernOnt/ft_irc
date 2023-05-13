@@ -14,6 +14,7 @@
 #include <sys/time.h>		// FD_SET, FD_ISSET, FD_ZERO macros 
 #include <iostream>
 #include <map>
+#include <vector>
 #include <sstream>
 
 #define TRUE	1
@@ -27,7 +28,7 @@
 	 
 struct client_data{
 	client_data()
-		: nick("*"), username("*u"), realname("*r"), password_passed(false), oprtor(false), ip_address("127.0.0.1"),disconnected(false)  {}
+		: nick("*"), username("*u"), realname("*r"), password_passed(false), oprtor(false), ip_address("127.0.0.1"), registered(false) {}
 
   	std::string		nick;
     std::string     username;
@@ -41,7 +42,8 @@ struct client_data{
 
     std::string     ip_address;
 
-	bool			disconnected;
+    //state machine
+    bool            registered;
 };
 
 
@@ -68,6 +70,11 @@ class Server {
         void Compressfds( void );
         void ServerMsgToClient( int client_sd, std::string msgcode, std::string line );
         void WelcomeClient( int client_sd );
+
+        //utils
+        std::vector<std::string> SplitCommand( std::string data );
+        int GetOperatorCount( void );
+        int GetUnregisteredCount( void );
 
         //commands
         void ProcessCommand( int client_sd, std::string line );

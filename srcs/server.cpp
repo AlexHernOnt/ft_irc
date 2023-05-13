@@ -244,3 +244,46 @@ void Server::ServerMsgToClient( int client_sd, std::string msgcode, std::string 
 	const char* formatted_msg_char = formatted_msg.c_str();
 	send(client_sd, formatted_msg_char, formatted_msg.size(), 0);
 }
+
+std::vector<std::string> Server::SplitCommand( std::string data )
+{
+	std::vector<std::string> split_inputs;
+
+	std::string::size_type prev_pos = 0, pos = 0;
+
+    while (true)
+    {
+		pos = data.find(" ", pos);
+        std::string substring( data.substr(prev_pos, pos - prev_pos) );
+
+        split_inputs.push_back(substring);
+
+		if (pos == std::string::npos)
+			break;
+        prev_pos = ++pos;
+    }
+
+	return split_inputs;
+}
+
+int Server::GetOperatorCount( void )
+{
+	int num_operators = 0;
+	for (std::map<int, client_data>::iterator i_client = client_list.begin(); i_client != client_list.end(); std::advance(i_client, 1))
+	{
+		if (i_client->second.oprtor == true)
+			num_operators++;
+	}
+	return num_operators;
+}
+
+int Server::GetUnregisteredCount( void )
+{
+	int num_registered = 0;
+	for (std::map<int, client_data>::iterator i_client = client_list.begin(); i_client != client_list.end(); std::advance(i_client, 1))
+	{
+		if (i_client->second.registered == false)
+			num_registered++;
+	}
+	return num_registered;
+}
