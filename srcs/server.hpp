@@ -14,11 +14,13 @@
 #include <sys/time.h>		// FD_SET, FD_ISSET, FD_ZERO macros 
 #include <iostream>
 #include <map>
+#include <sstream>
 
 #define TRUE	1
 #define FALSE	0
 
-#define DEFAULT_NAME        "irc.ciudadreal.com"
+#define HOST_NAME           "irc.ciudadreal.com"
+
 #define DEFAULT_PASSWORD	"1234" 
 #define DEFAULT_PORT	    6667 
 #define MAX_CLIENTS         30
@@ -88,7 +90,6 @@ class Server {
         
     private:
         //server properties
-        std::string                 host_name;
         std::string	                password;
         int			                port;
 

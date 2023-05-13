@@ -22,28 +22,53 @@ void Server::Command_user( int client_sd, std::string data )
 
 void Server::WelcomeClient( int client_sd )
 {
-	ServerMsgToClient(client_sd, "001", "Welcome to the Internet Relay Network " + client_list[client_sd].username + "!~" + client_list[client_sd].nick + "@" + client_list[client_sd].ip_address);
+	std::ostringstream oss;
+
+	oss << ":There are " << client_list.size() << " users and 0 services on 1 servers";
+	ServerMsgToClient(client_sd, "251", oss.str());
+	oss.str("");
+	oss.clear();
+
+	//TODO: número de operadores
+	oss << client_list.size() << " :operators online";
+	ServerMsgToClient(client_sd, "252", oss.str());
+	oss.str("");
+	oss.clear();
+
+	//TODO: número de conexiones anónimas/sin registrar
+	oss << client_list.size() << " :unknown connections";
+	ServerMsgToClient(client_sd, "253", oss.str());
+	oss.str("");
+	oss.clear();
+
+	//TODO: número de canales
+	oss << client_list.size() << " :channels formed";
+	ServerMsgToClient(client_sd, "254", oss.str());
+	oss.str("");
+	oss.clear();
+
+	oss << ":I have " << client_list.size() << " users and 0 services on 1 servers";
+	ServerMsgToClient(client_sd, "255", oss.str());
+	oss.str("");
+	oss.clear();
+
+	oss << ":- " << HOST_NAME << " Message of the Day -";
+	ServerMsgToClient(client_sd, "375", oss.str());
+	oss.str("");
+	oss.clear();
+
+	//TODO: mensaje del día (varias líneas seguramente)
+	oss << ":(Message of the Day)";
+	ServerMsgToClient(client_sd, "372", oss.str());
+	oss.str("");
+	oss.clear();
+
+	oss << ":End of MOTD command.";
+	ServerMsgToClient(client_sd, "376", oss.str());
+	oss.str("");
+	oss.clear();
 
 	/*
-	:ircnet.hostsailor.com 001 albatrosstrosst :Welcome to the Internet Relay Network albatrosstrosst!~albatross@195.55.210.171
-	:ircnet.hostsailor.com 002 albatrosstrosst :Your host is ircnet.hostsailor.com, running version 2.11.2p3+0PNv1.06
-	:ircnet.hostsailor.com 003 albatrosstrosst :This server was created Thu May 20 2021 at 17:13:24 EDT
-	:ircnet.hostsailor.com 004 albatrosstrosst ircnet.hostsailor.com 2.11.2p3+0PNv1.06 aoOirw abeiIklmnoOpqrRstv
-	:ircnet.hostsailor.com 005 albatrosstrosst RFC2812 PREFIX=(ov)@+ CHANTYPES=#&!+ MODES=3 CHANLIMIT=#&!+:42 NICKLEN=15 TOPICLEN=255 KICKLEN=255 MAXLIST=beIR:64 CHANNELLEN=50 IDCHAN=!:5 CHANMODES=beIR,k,l,imnpstaqrzZ :are supported by this server
-	:ircnet.hostsailor.com 005 albatrosstrosst PENALTY FNC EXCEPTS=e INVEX=I CASEMAPPING=ascii NETWORK=IRCnet :are supported by this server
-	:ircnet.hostsailor.com 042 albatrosstrosst 0PNHAK5CQ :your unique ID
-	:ircnet.hostsailor.com 251 albatrosstrosst :There are 19755 users and 2 services on 26 servers
-	:ircnet.hostsailor.com 252 albatrosstrosst 65 :operators online
-	:ircnet.hostsailor.com 253 albatrosstrosst 8 :unknown connections
-	:ircnet.hostsailor.com 254 albatrosstrosst 11304 :channels formed
-	:ircnet.hostsailor.com 255 albatrosstrosst :I have 753 users, 0 services and 1 servers
-	:ircnet.hostsailor.com 265 albatrosstrosst 753 1328 :Current local users 753, max 1328
-	:ircnet.hostsailor.com 266 albatrosstrosst 19755 25625 :Current global users 19755, max 25625
-	:ircnet.hostsailor.com 375 albatrosstrosst :- ircnet.hostsailor.com Message of the Day -
-	:ircnet.hostsailor.com 372 albatrosstrosst :- 9/5/2023 16:44
-		... (todos los que llevan 372 son lineas del message of the day)
-
-	:ircnet.hostsailor.com 376 albatrosstrosst :End of MOTD command.
 	:albatrosstrosst MODE albatrosstrosst :+i
 	*/
 }

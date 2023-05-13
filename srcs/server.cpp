@@ -14,7 +14,6 @@
 
 Server::Server( void )
 {
-	host_name = DEFAULT_NAME;
 	password = DEFAULT_PASSWORD;
 	port = DEFAULT_PORT;
 	nfds = 1;
@@ -146,7 +145,7 @@ void Server::MainLoop( void )
 					client_list.insert(std::pair<int, client_data>(new_socket, client_data()));
 					client_list[new_socket].ip_address = inet_ntoa(address.sin_addr);
 
-					ServerMsgToClient( new_socket, "020", "Please wait while we process your connection." );
+					ServerMsgToClient( new_socket, "020", ":Please wait while we process your connection." );
 					std::cout << "New incoming connection - " << client_list[new_socket].nick << std::endl;
 					fds[nfds].fd = new_socket;
 					fds[nfds].events = POLLIN;
@@ -179,7 +178,7 @@ void Server::MainLoop( void )
 
 					std::cout << len << " bytes received" << std::endl;
 					std::string str_buffer = buffer;
-					ProcessCommand(i, buffer);
+					ProcessCommand(fds[i].fd, buffer);
 				}
 
 				if (close_conn)
@@ -241,7 +240,7 @@ void Server::ProcessCommand( int client_sd, std::string line )
 
 void Server::ServerMsgToClient( int client_sd, std::string msgcode, std::string line )
 {
-	std::string formatted_msg = ":" + host_name + " " + msgcode + " " + client_list[client_sd].nick + " :" + line + "\n";
+	std::string formatted_msg = ":" + (std::string)HOST_NAME + " " + msgcode + " " + client_list[client_sd].nick + " " + line + "\n";
 	const char* formatted_msg_char = formatted_msg.c_str();
 	send(client_sd, formatted_msg_char, formatted_msg.size(), 0);
 }
