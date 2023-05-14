@@ -16,12 +16,12 @@ CXX = clang++
 
 CPPFLAGS = -std=c++98 -Wall -Wextra -Werror
 
-SRCS =	srcs/main.cpp srcs/server.cpp \
+SRCS =	srcs/main.cpp srcs/server.cpp srcs/channel.cpp \
 			srcs/commands/join.cpp \
 			srcs/commands/nick.cpp \
 			srcs/commands/user.cpp
 
-OBJS = srcs/main.o srcs/server.o \
+OBJS = srcs/main.o srcs/server.o srcs/channel.o \
 			srcs/commands/join.o \
 			srcs/commands/nick.o \
 			srcs/commands/user.o

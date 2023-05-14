@@ -16,6 +16,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
+#include "channel.hpp"
 
 #define TRUE	1
 #define FALSE	0
@@ -28,25 +29,26 @@
 	 
 struct client_data{
 	client_data()
-		: nick("*"), username("*u"), realname("*r"), password_passed(false), oprtor(false), ip_address("127.0.0.1"), registered(false) {}
+		: nick("*"), username(""), realname(""), password_passed(false), channel_name(""), oprtor(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), registered(false) {}
 
   	std::string		nick;
     std::string     username;
     std::string     realname;
 
 	bool			password_passed;
+
+    //properties
+    std::string     channel_name; //nombre del canal en el que está. "" si no está en ninguno
     bool            oprtor;
-	
-	//room?
-	//password set?
 
     std::string     ip_address;
 
     //state machine
+    bool            user_set;
+    bool            nick_set;
+
     bool            registered;
 };
-
-
 
 class Server {
     
@@ -72,9 +74,10 @@ class Server {
         void WelcomeClient( int client_sd );
 
         //utils
-        std::vector<std::string> SplitCommand( std::string data );
+        std::vector<std::string> Split( std::string data, std::string delimiter );
         int GetOperatorCount( void );
         int GetUnregisteredCount( void );
+        int GetClientSdByNick( std::string nick );
 
         //commands
         void ProcessCommand( int client_sd, std::string line );
@@ -108,6 +111,9 @@ class Server {
         // Set of socket descriptors 
         struct pollfd               fds[200];
         int                         nfds;
+
+        // Channels
+        std::map<std::string, Channel >  channels; // 1: nombre del canal 2: client_sd asociados
 
         //others
         int                              max_sd;

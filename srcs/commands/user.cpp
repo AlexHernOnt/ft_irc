@@ -17,7 +17,7 @@ void Server::Command_user( int client_sd, std::string data )
     //std::cout << "ENTRA AL USER EL CLIENTE: " << client_list[client_sd].nick << " CON LOS SIGUIENTES DATOS: " << data << std::endl;
 	std::ostringstream oss;
 
-	std::vector<std::string> split_inputs = SplitCommand(data);
+	std::vector<std::string> split_inputs = Split(data, " ");
 
 	if (split_inputs.size() < 5) //parámetros insuficientes
 	{
@@ -37,11 +37,15 @@ void Server::Command_user( int client_sd, std::string data )
 		return;
 	}
     //ok continuar
-	client_list[client_sd].registered = true;
+	client_list[client_sd].user_set = true;
 	client_list[client_sd].username = split_inputs[1];
 	client_list[client_sd].realname = split_inputs[4];
 
-    WelcomeClient(client_sd);
+	if (client_list[client_sd].nick_set == true)
+	{
+		client_list[client_sd].registered = true;
+		WelcomeClient(client_sd);
+	}
 }
 
 void Server::WelcomeClient( int client_sd )

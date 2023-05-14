@@ -91,6 +91,7 @@ void Server::MainLoop( void )
 	int    compress_array = FALSE;
 	bool   close_conn;
 	char   buffer[1024];
+	std::string str_buffer;
 	
 	int    current_size = 0;
 
@@ -177,8 +178,18 @@ void Server::MainLoop( void )
 					}
 
 					std::cout << len << " bytes received" << std::endl;
-					std::string str_buffer = buffer;
-					ProcessCommand(fds[i].fd, buffer);
+					//lee y añade al buffer hasta que deje de llegar
+					str_buffer += buffer;
+					memset(buffer, 0, 1024);
+				}
+				if (str_buffer != "")
+				{
+					std::vector<std::string> buffer_lines = Split(str_buffer, "\n");
+					for (unsigned long k = 0; k < buffer_lines.size(); k++)
+					{
+						ProcessCommand(fds[i].fd, buffer_lines[k]);
+					}
+					str_buffer = "";
 				}
 
 				if (close_conn)
@@ -226,7 +237,6 @@ void Server::Cleanfds( void )
 
 void Server::ProcessCommand( int client_sd, std::string line )
 {
-	line[line.find('\n')] = '\0';
 	std::string command = line.substr(0, line.find(' '));
 
 	if (command_map.count(command))
@@ -245,7 +255,7 @@ void Server::ServerMsgToClient( int client_sd, std::string msgcode, std::string 
 	send(client_sd, formatted_msg_char, formatted_msg.size(), 0);
 }
 
-std::vector<std::string> Server::SplitCommand( std::string data )
+std::vector<std::string> Server::Split( std::string data, std::string delimiter )
 {
 	std::vector<std::string> split_inputs;
 
@@ -253,10 +263,11 @@ std::vector<std::string> Server::SplitCommand( std::string data )
 
     while (true)
     {
-		pos = data.find(" ", pos);
+		pos = data.find(delimiter, pos);
         std::string substring( data.substr(prev_pos, pos - prev_pos) );
-
-        split_inputs.push_back(substring);
+		//std::cout << substring << " " << substring.size() << std::endl;
+		if (substring != "")
+        	split_inputs.push_back(substring);
 
 		if (pos == std::string::npos)
 			break;
@@ -286,4 +297,15 @@ int Server::GetUnregisteredCount( void )
 			num_registered++;
 	}
 	return num_registered;
+}
+
+int Server::GetClientSdByNick( std::string nick )
+{
+	int user_sd = -1;
+	for (std::map<int, client_data>::iterator i_client = client_list.begin(); i_client != client_list.end(); std::advance(i_client, 1))
+	{
+		if (i_client->second.nick == nick)
+			return i_client->first;
+	}
+	return user_sd;
 }
