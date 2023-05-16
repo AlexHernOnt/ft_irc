@@ -41,11 +41,28 @@ void Server::Command_user( int client_sd, std::string data )
 	client_list[client_sd].username = split_inputs[1];
 	client_list[client_sd].realname = split_inputs[4];
 
-	if (client_list[client_sd].nick_set == true)
-	{
-		client_list[client_sd].registered = true;
-		WelcomeClient(client_sd);
-	}
+	if (client_list[client_sd].registered == false)
+    {
+        if (client_list[client_sd].nick_set == false)
+            return;
+        if (client_list[client_sd].password_ok == false && password != "")
+        {
+            oss << ":Password incorrect";
+            ServerMsgToClient(client_sd, "464", oss.str());
+            oss.str("");
+            oss.clear();
+
+            oss << "ERROR :Closing Link: " << client_list[client_sd].ip_address << " (Bad Password)" << std::endl;
+            OtherMsgToClient(client_sd, oss.str());
+            oss.str("");
+            oss.clear();
+
+            close_conn = true;
+            return;
+        }
+        client_list[client_sd].registered = true;
+        WelcomeClient(client_sd);
+    }
 }
 
 void Server::WelcomeClient( int client_sd )

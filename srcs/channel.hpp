@@ -21,6 +21,7 @@ class Channel {
     private:
         std::string         channel_concept;
         std::vector<int>    client_sd_list;
+        //permisos
 };
 
 #endif

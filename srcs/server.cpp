@@ -18,9 +18,13 @@ Server::Server( void )
 	port = DEFAULT_PORT;
 	nfds = 1;
 
-	command_map["JOIN"] = &Server::Command_join;
+	command_map["PASS"] = &Server::Command_pass;
 	command_map["NICK"] = &Server::Command_nick;
 	command_map["USER"] = &Server::Command_user;
+
+	command_map["JOIN"] = &Server::Command_join;
+
+	command_map["QUIT"] = &Server::Command_quit;
 }
 
 Server::~Server( void )
@@ -88,8 +92,7 @@ void Server::MainLoop( void )
 {
 	int    len, rc = 1;
 	int    new_socket = -1;
-	int    compress_array = FALSE;
-	bool   close_conn;
+	bool   compress_array = false;
 	char   buffer[1024];
 	std::string str_buffer;
 	
@@ -124,7 +127,7 @@ void Server::MainLoop( void )
 				client_list.erase(fds[i].fd);
 				close(fds[i].fd);
 				fds[i].fd = -1;
-				compress_array = TRUE;
+				compress_array = true;
 				continue;
 			}
 
@@ -197,14 +200,14 @@ void Server::MainLoop( void )
 					client_list.erase(fds[i].fd);
 					close(fds[i].fd);
 					fds[i].fd = -1;
-					compress_array = TRUE;
+					compress_array = true;
 				}
 			}
 		}
 
 		if (compress_array)
 		{
-			compress_array = FALSE;
+			compress_array = false;
 			Compressfds();
 		}
 	}
@@ -253,6 +256,28 @@ void Server::ServerMsgToClient( int client_sd, std::string msgcode, std::string 
 	std::string formatted_msg = ":" + (std::string)HOST_NAME + " " + msgcode + " " + client_list[client_sd].nick + " " + line + "\n";
 	const char* formatted_msg_char = formatted_msg.c_str();
 	send(client_sd, formatted_msg_char, formatted_msg.size(), 0);
+}
+
+void Server::OtherMsgToClient( int client_sd, std::string line )
+{
+	const char* formatted_msg_char = line.c_str();
+	send(client_sd, formatted_msg_char, line.size(), 0);
+}
+
+void Server::SendClientMsg( int client_sd, std::string line, int target_client_sd )
+{
+	std::string formatted_msg = ":" + client_list[client_sd].nick + "!~" + client_list[client_sd].username + "@" + client_list[client_sd].ip_address + " " + line;
+	const char* formatted_msg_char = formatted_msg.c_str();
+	send(target_client_sd, formatted_msg_char, formatted_msg.size(), 0);
+}
+
+void Server::SendClientMsgToChannel( int client_sd, std::string line, std::string channel_name )
+{
+	std::vector<int> channel_client_sd_list = channels.find(channel_name)->second.GetClients();
+	for( unsigned long i = 0; i < channel_client_sd_list.size(); i++ )
+	{
+		SendClientMsg( client_sd, line, channel_client_sd_list[i]);
+	}
 }
 
 std::vector<std::string> Server::Split( std::string data, std::string delimiter )

@@ -60,8 +60,25 @@ void Server::Command_nick( int client_sd, std::string data )
     client_list[client_sd].nick_set = true;
     client_list[client_sd].nick = split_inputs[1];
 
-    if (client_list[client_sd].registered == false && client_list[client_sd].user_set == true)
+    if (client_list[client_sd].registered == false)
     {
+        if (client_list[client_sd].user_set == false)
+            return;
+        if (client_list[client_sd].password_ok == false && password != "")
+        {
+            oss << ":Password incorrect";
+            ServerMsgToClient(client_sd, "464", oss.str());
+            oss.str("");
+            oss.clear();
+
+            oss << "ERROR :Closing Link: " << client_list[client_sd].ip_address << " (Bad Password)" << std::endl;
+            OtherMsgToClient(client_sd, oss.str());
+            oss.str("");
+            oss.clear();
+
+            close_conn = true;
+            return;
+        }
         client_list[client_sd].registered = true;
         WelcomeClient(client_sd);
     }

@@ -29,7 +29,7 @@
 	 
 struct client_data{
 	client_data()
-		: nick("*"), username(""), realname(""), password_passed(false), channel_name(""), oprtor(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), registered(false) {}
+		: nick("*"), username(""), realname(""), password_passed(false), channel_name(""), oprtor(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), password_ok(false), registered(false) {}
 
   	std::string		nick;
     std::string     username;
@@ -46,6 +46,7 @@ struct client_data{
     //state machine
     bool            user_set;
     bool            nick_set;
+    bool            password_ok;
 
     bool            registered;
 };
@@ -70,7 +71,14 @@ class Server {
         
         //functions
         void Compressfds( void );
-        void ServerMsgToClient( int client_sd, std::string msgcode, std::string line );
+
+        //msg functions
+        void ServerMsgToClient( int client_sd, std::string msgcode, std::string line ); //mensajes del servidor al cliente
+        void OtherMsgToClient( int client_sd, std::string line ); //mensajes personalizados (rollo ERROR por ejemplo que son mensajes sin todo el prefijo del server)
+        void SendClientMsg( int client_sd, std::string line, int target_client_sd );  //mensajes recibidos de clientes para otros clientes/canales
+        void SendClientMsgToChannel( int client_sd, std::string line, std::string channel_name ); //send client msg to channel
+
+        //new connection (only clients available)
         void WelcomeClient( int client_sd );
 
         //utils
@@ -113,12 +121,13 @@ class Server {
         int                         nfds;
 
         // Channels
-        std::map<std::string, Channel >  channels; // 1: nombre del canal 2: client_sd asociados
+        std::map<std::string, Channel>  channels; // 1: nombre del canal 2: client_sd asociados
 
         //others
         int                              max_sd;
         int							     activity;
         std::map<std::string, CommFunct> command_map;
+        bool                             close_conn;
 };
 
 #endif
