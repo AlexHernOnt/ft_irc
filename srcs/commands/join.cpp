@@ -42,12 +42,19 @@ void Server::Command_join( int client_sd, std::string data )
 
     for (unsigned long i = 0; i < channels.size(); i++)
     {
-        //TODO: comprobar que esté bien escrito y eso
+        if (CheckChannelName(channels[i]) == false)
+        {
+            oss << channels[i] << " :No such channel";
+            ServerMsgToClient(client_sd, "403", oss.str());
+            oss.str("");
+            oss.clear();
+            continue;
+        }
+
         client_list[client_sd].channels_joined.push_back(channels[i]);
         it = channels_list.find(channels[i]);
         if (it == channels_list.end()) //crear nuevo si no existe
         {
-            //TODO: comprobar si el channel empieza por # o & y que no tenga espacios, ^G o comas
             channels_list.insert(std::pair<std::string, Channel>(channels[i], Channel()));
             it = channels_list.find(channels[i]);
         }
@@ -60,6 +67,7 @@ void Server::Command_join( int client_sd, std::string data )
 		oss.clear();
 
         oss << "= " << channels[i] << " :";
+
         std::vector<int> channel_users = it->second.GetOperators();
         //operadores
         for (unsigned long j = 0; j < channel_users.size(); j++)
@@ -72,6 +80,7 @@ void Server::Command_join( int client_sd, std::string data )
         {
             oss << "+" << client_list[channel_users[j]].nick << " ";
         }
+
 		ServerMsgToClient(client_sd, "353", oss.str());
 		oss.str("");
 		oss.clear();

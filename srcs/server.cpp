@@ -23,6 +23,8 @@ Server::Server( void )
 	command_map["USER"] = &Server::Command_user;
 
 	command_map["JOIN"] = &Server::Command_join;
+	command_map["PART"] = &Server::Command_part;
+	command_map["LIST"] = &Server::Command_list;
 
 	command_map["QUIT"] = &Server::Command_quit;
 }
@@ -322,4 +324,16 @@ int Server::GetClientSdByNick( std::string nick )
 			return i_client->first;
 	}
 	return user_sd;
+}
+
+bool Server::CheckChannelName( std::string channel )
+{
+	if (channel[0] != '#' && channel[0] != '&')
+		return false;
+	for (unsigned long i = 0; i < channel.size(); i++)
+    {
+        if (channel[i] == 7 || channel[i] == ',')
+            return false;
+    }
+	return true;
 }

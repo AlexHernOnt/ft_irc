@@ -13,7 +13,7 @@ class Channel {
         Channel( const Channel& other );
 
         int JoinClient( int client_sd, bool oprtor );
-        void PartClient( int client_sd );
+        bool PartClient( int client_sd ); //return false if not found
         void SetChannelConcept( std::string new_concept );
 
         std::string GetChannelConcept( void );

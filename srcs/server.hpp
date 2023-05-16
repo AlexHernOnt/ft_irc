@@ -84,6 +84,7 @@ class Server {
         std::vector<std::string> Split( std::string data, std::string delimiter );
         int GetUnregisteredCount( void );
         int GetClientSdByNick( std::string nick );
+        bool CheckChannelName( std::string channel );
 
         //commands
         void ProcessCommand( int client_sd, std::string line );
@@ -100,6 +101,7 @@ class Server {
         //  channel commands
         void Command_join( int client_sd, std::string data );   //join a channel/channels
         void Command_part( int client_sd, std::string data );   //part a channel/channels
+        void Command_list( int client_sd, std::string data );   //list channels
 
         //  message commands
         void Command_privmsg( int client_sd, std::string data );    //mensaje para un canal (si empieza con #) o persona especifica

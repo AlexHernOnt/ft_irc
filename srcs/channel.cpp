@@ -36,17 +36,21 @@ int Channel::JoinClient( int client_sd, bool oprtor )
     return 0; //ok
 }
 
-void Channel::PartClient( int client_sd )
+bool Channel::PartClient( int client_sd )
 {
     //lista de clientes
     std::vector<int>::iterator i_client = std::find(client_sd_list.begin(), client_sd_list.end(), client_sd);
     if (i_client != client_sd_list.end())
         client_sd_list.erase(i_client);
+    else
+        return false;
 
     //lista de operadores
     i_client = std::find(oprtor_sd_list.begin(), oprtor_sd_list.end(), client_sd);
     if (i_client != oprtor_sd_list.end())
         oprtor_sd_list.erase(i_client);
+
+    return true;
 }
 
 void Channel::SetChannelConcept( std::string new_concept )

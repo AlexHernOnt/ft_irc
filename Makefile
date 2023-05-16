@@ -18,6 +18,8 @@ CPPFLAGS = -std=c++98 -Wall -Wextra -Werror
 
 SRCS =	srcs/main.cpp srcs/server.cpp srcs/channel.cpp \
 			srcs/commands/join.cpp \
+			srcs/commands/part.cpp \
+			srcs/commands/list.cpp \
 			srcs/commands/pass.cpp \
 			srcs/commands/nick.cpp \
 			srcs/commands/user.cpp \
@@ -25,6 +27,8 @@ SRCS =	srcs/main.cpp srcs/server.cpp srcs/channel.cpp \
 
 OBJS = srcs/main.o srcs/server.o srcs/channel.o \
 			srcs/commands/join.o \
+			srcs/commands/part.o \
+			srcs/commands/list.o \
 			srcs/commands/pass.o \
 			srcs/commands/nick.o \
 			srcs/commands/user.o \
