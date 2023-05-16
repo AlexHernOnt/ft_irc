@@ -44,7 +44,7 @@ void Server::Command_quit( int client_sd, std::string data )
     {
         std::string channel_str = client_list[client_sd].channels_joined[i];
         SendClientMsgToChannel(client_sd, oss.str(), channel_str);
-        channels[channel_str].PartClient( client_sd );
+        channels_list[channel_str].PartClient( client_sd );
     }
     close_conn = true;
 }

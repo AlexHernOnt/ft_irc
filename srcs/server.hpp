@@ -122,7 +122,7 @@ class Server {
         int                         nfds;
 
         // Channels
-        std::map<std::string, Channel>  channels; // 1: nombre del canal 2: client_sd asociados
+        std::map<std::string, Channel>  channels_list; // 1: nombre del canal 2: client_sd asociados
 
         //others
         int                              max_sd;

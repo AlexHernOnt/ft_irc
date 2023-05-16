@@ -28,13 +28,13 @@ void Server::Command_join( int client_sd, std::string data )
 		return;
 	}
 
-    std::vector<std::string> channels_list = Split(split_inputs[1], ",");
+    std::vector<std::string> channels = Split(split_inputs[1], ",");
     
-    for (unsigned long i = 0; i < channels_list.size(); i++)
+    for (unsigned long i = 0; i < channels.size(); i++)
     {
         //TODO: comprobar que esté bien escrito y eso
-        client_list[client_sd].channels_joined.push_back(channels_list[i]);
-        Channel * channel = &channels.find(channels_list[i])->second;
+        client_list[client_sd].channels_joined.push_back(channels[i]);
+        Channel * channel = &channels_list.find(channels[i])->second;
         channel->JoinClient( client_sd );
     }
 }
