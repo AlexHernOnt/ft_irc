@@ -12,15 +12,18 @@ class Channel {
         ~Channel( void );
         Channel( const Channel& other );
 
-        int JoinClient( int client_sd );
+        int JoinClient( int client_sd, bool oprtor );
         void PartClient( int client_sd );
         void SetChannelConcept( std::string new_concept );
 
-        std::string GetChannelConcep( void );
+        std::string GetChannelConcept( void );
         std::vector<int> GetClients( void );
+        std::vector<int> GetOperators( void );
+        std::vector<int> GetNoOperatorClients( void );
     private:
         std::string         channel_concept;
         std::vector<int>    client_sd_list;
+        std::vector<int>    oprtor_sd_list;
         //permisos
 };
 

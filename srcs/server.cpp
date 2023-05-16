@@ -266,7 +266,7 @@ void Server::OtherMsgToClient( int client_sd, std::string line )
 
 void Server::SendClientMsg( int client_sd, std::string line, int target_client_sd )
 {
-	std::string formatted_msg = ":" + client_list[client_sd].nick + "!~" + client_list[client_sd].username + "@" + client_list[client_sd].ip_address + " " + line;
+	std::string formatted_msg = ":" + client_list[client_sd].nick + "!~" + client_list[client_sd].username + "@" + client_list[client_sd].ip_address + " " + line + "\n";
 	const char* formatted_msg_char = formatted_msg.c_str();
 	send(target_client_sd, formatted_msg_char, formatted_msg.size(), 0);
 }
@@ -300,17 +300,6 @@ std::vector<std::string> Server::Split( std::string data, std::string delimiter 
     }
 
 	return split_inputs;
-}
-
-int Server::GetOperatorCount( void )
-{
-	int num_operators = 0;
-	for (std::map<int, client_data>::iterator i_client = client_list.begin(); i_client != client_list.end(); std::advance(i_client, 1))
-	{
-		if (i_client->second.oprtor == true)
-			num_operators++;
-	}
-	return num_operators;
 }
 
 int Server::GetUnregisteredCount( void )

@@ -74,7 +74,8 @@ void Server::WelcomeClient( int client_sd )
 	oss.str("");
 	oss.clear();
 
-	oss << GetOperatorCount() << " :operators online";
+	//MOTIVO: se refiere a los OPERADORES DE SERVIDOR cosa que no hay implementado en nuestro servicio
+	oss <<  "0 :operators online";
 	ServerMsgToClient(client_sd, "252", oss.str());
 	oss.str("");
 	oss.clear();
@@ -84,8 +85,7 @@ void Server::WelcomeClient( int client_sd )
 	oss.str("");
 	oss.clear();
 
-	//TODO: número de canales
-	oss << client_list.size() << " :channels formed";
+	oss << channels_list.size() << " :channels formed";
 	ServerMsgToClient(client_sd, "254", oss.str());
 	oss.str("");
 	oss.clear();

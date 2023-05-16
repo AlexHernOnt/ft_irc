@@ -29,7 +29,7 @@
 	 
 struct client_data{
 	client_data()
-		: nick("*"), username(""), realname(""), password_passed(false), oprtor(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), password_ok(false), registered(false) {}
+		: nick("*"), username(""), realname(""), password_passed(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), password_ok(false), registered(false) {}
 
   	std::string		nick;
     std::string     username;
@@ -39,7 +39,6 @@ struct client_data{
 
     //properties
     std::vector<std::string>     channels_joined; //nombre del canal en el que está. "" si no está en ninguno
-    bool            oprtor;
 
     std::string     ip_address;
 
@@ -83,7 +82,6 @@ class Server {
 
         //utils
         std::vector<std::string> Split( std::string data, std::string delimiter );
-        int GetOperatorCount( void );
         int GetUnregisteredCount( void );
         int GetClientSdByNick( std::string nick );
 
