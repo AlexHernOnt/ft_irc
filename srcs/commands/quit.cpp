@@ -31,10 +31,11 @@ void Server::Command_quit( int client_sd, std::string data )
     oss.str("");
 	oss.clear();
 
-    if (client_list[client_sd].channel_name != "")
+    oss << " QUIT :Quit: :" << quit_msg;
+    for (unsigned long i = 0; i < client_list[client_sd].channels_joined.size(); i++)
     {
-        oss << " QUIT :Quit: :" << quit_msg;
-        SendClientMsgToChannel(client_sd, oss.str(), client_list[client_sd].channel_name);
+        SendClientMsgToChannel(client_sd, oss.str(), client_list[client_sd].channels_joined[i]);
+        channels[client_list[client_sd].channels_joined[i]].PartClient( client_sd );
     }
     close_conn = true;
 }

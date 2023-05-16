@@ -29,7 +29,7 @@
 	 
 struct client_data{
 	client_data()
-		: nick("*"), username(""), realname(""), password_passed(false), channel_name(""), oprtor(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), password_ok(false), registered(false) {}
+		: nick("*"), username(""), realname(""), password_passed(false), oprtor(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), password_ok(false), registered(false) {}
 
   	std::string		nick;
     std::string     username;
@@ -38,7 +38,7 @@ struct client_data{
 	bool			password_passed;
 
     //properties
-    std::string     channel_name; //nombre del canal en el que está. "" si no está en ninguno
+    std::vector<std::string>     channels_joined; //nombre del canal en el que está. "" si no está en ninguno
     bool            oprtor;
 
     std::string     ip_address;
@@ -100,7 +100,8 @@ class Server {
         void Command_quit( int client_sd, std::string data );   //end connection (client sent message example: "ERROR :Closing Link: 195.55.210.171 (Quit: potato)")
 
         //  channel commands
-        void Command_join( int client_sd, std::string data );   //join a channel
+        void Command_join( int client_sd, std::string data );   //join a channel/channels
+        void Command_part( int client_sd, std::string data );   //part a channel/channels
 
         //  message commands
         void Command_privmsg( int client_sd, std::string data );    //mensaje para un canal (si empieza con #) o persona especifica
