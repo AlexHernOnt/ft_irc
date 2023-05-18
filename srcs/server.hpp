@@ -97,11 +97,15 @@ class Server {
         //  other commands
         void Command_oper( int client_sd, std::string data );   //ask for operator privileges
         void Command_quit( int client_sd, std::string data );   //end connection (client sent message example: "ERROR :Closing Link: 195.55.210.171 (Quit: potato)")
+        void Command_mode( int client_sd, std::string data );   //channel/user mode i think
+        void Command_kick( int client_sd, std::string data );   //kick a user from the channel
+        void Command_invite( int client_sd, std::string data );   //invite a user to the channel
 
         //  channel commands
         void Command_join( int client_sd, std::string data );   //join a channel/channels
         void Command_part( int client_sd, std::string data );   //part a channel/channels
         void Command_list( int client_sd, std::string data );   //list channels
+        void Command_topic( int client_sd, std::string data );   //get/set channel topic
 
         //  message commands
         void Command_privmsg( int client_sd, std::string data );    //mensaje para un canal (si empieza con #) o persona especifica

@@ -25,8 +25,13 @@ Server::Server( void )
 	command_map["JOIN"] = &Server::Command_join;
 	command_map["PART"] = &Server::Command_part;
 	command_map["LIST"] = &Server::Command_list;
+	command_map["TOPIC"] = &Server::Command_topic;
+	command_map["MODE"] = &Server::Command_mode;
+	command_map["KICK"] = &Server::Command_kick;
+	command_map["INVITE"] = &Server::Command_invite;
 
 	command_map["PRIVMSG"] = &Server::Command_privmsg;
+	command_map["NOTICE"] = &Server::Command_notice;
 
 	command_map["QUIT"] = &Server::Command_quit;
 }

@@ -61,11 +61,21 @@ void Server::Command_join( int client_sd, std::string data )
         }
         it->second.JoinClient( client_sd, false );
 
+        //TODO: ERR_CHANNELISFULL? ERR_INVITEONLYCHAN, ERR_BANNEDFROMCHAN, ERR_BADCHANNELKEY (password)
+
         //aviso JOIN a todos los del canal
         oss << "JOIN :" << channels[i];
         SendClientMsgToChannel(client_sd, oss.str(), channels[i]);
         oss.str("");
 		oss.clear();
+
+        if (it->second.GetChannelConcept() != "")
+        {
+            oss << channels[i] << " :" << it->second.GetChannelConcept();
+            ServerMsgToClient(client_sd, "332", oss.str());
+            oss.str("");
+            oss.clear();
+        }
 
         oss << "= " << channels[i] << " :";
 

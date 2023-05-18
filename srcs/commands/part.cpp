@@ -53,8 +53,15 @@ void Server::Command_part( int client_sd, std::string data )
                 oss.clear();
                 continue;
             }
-            else //TODO: borra el string de canal del cliente
+            else
             {
+                oss << "PART " << channels[i];
+                SendClientMsg(client_sd, oss.str(), client_sd); //porque lo he quitado antes. Si es que soy un chapuzas
+                SendClientMsgToChannel(client_sd, oss.str(), channels[i]);
+                oss.str("");
+                oss.clear();
+
+                //borrar de la lista de canales guardado en el cliente
                 for (unsigned long j = 0; j < client_list[client_sd].channels_joined.size(); j++)
                 {
                     if (client_list[client_sd].channels_joined[j] == channels[i])
@@ -65,6 +72,7 @@ void Server::Command_part( int client_sd, std::string data )
                 }
             }
 
+            //borrar el canal si no queda nadie
             if (channels_list[channels[i]].GetClients().size() <= 0)
             {
                 channels_list.erase(channels_list.find(channels[i]));
