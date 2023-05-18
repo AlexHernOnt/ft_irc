@@ -283,6 +283,8 @@ void Server::SendClientMsg( int client_sd, std::string line, int target_client_s
 
 void Server::SendClientMsgToChannel( int client_sd, std::string line, std::string channel_name, bool resendtoself )
 {
+	if (channels_list.find(channel_name) == channels_list.end())
+		return;
 	std::vector<int> channel_client_sd_list = channels_list.find(channel_name)->second.GetClients();
 	for( unsigned long i = 0; i < channel_client_sd_list.size(); i++ )
 	{

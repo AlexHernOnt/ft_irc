@@ -38,7 +38,7 @@ void Server::Command_privmsg( int client_sd, std::string data )
 		return;
 	}
 
-    if ((split_inputs.size() + split_msg.size() - 1) < 3) //solo ha escrito el mensaje
+    if ((split_inputs.size() + split_msg.size() - 1) < 3) //no ha escrito el mensaje
 	{
 		oss << ":No text to send";
 		ServerMsgToClient(client_sd, "412", oss.str());

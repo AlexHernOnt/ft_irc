@@ -93,3 +93,23 @@ std::vector<int> Channel::GetOperators( void )
 {
     return oprtor_sd_list;
 }
+
+bool Channel::GetIfClientOperator( int client_sd )
+{
+    for (unsigned long i = 0; i < oprtor_sd_list.size(); i++)
+    {
+        if (oprtor_sd_list[i] == client_sd)
+            return true;
+    }
+    return false;
+}
+
+bool Channel::GetIfClientInChannel( int client_sd )
+{
+    for (unsigned long i = 0; i < client_sd_list.size(); i++)
+    {
+        if (client_sd_list[i] == client_sd)
+            return true;
+    }
+    return false;
+}

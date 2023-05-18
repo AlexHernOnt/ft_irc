@@ -95,7 +95,6 @@ class Server {
         void Command_user( int client_sd, std::string data );   //sets user variables
 
         //  other commands
-        void Command_oper( int client_sd, std::string data );   //ask for operator privileges
         void Command_quit( int client_sd, std::string data );   //end connection (client sent message example: "ERROR :Closing Link: 195.55.210.171 (Quit: potato)")
         void Command_mode( int client_sd, std::string data );   //channel/user mode i think
         void Command_kick( int client_sd, std::string data );   //kick a user from the channel

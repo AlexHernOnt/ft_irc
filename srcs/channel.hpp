@@ -20,6 +20,8 @@ class Channel {
         std::vector<int> GetClients( void );
         std::vector<int> GetOperators( void );
         std::vector<int> GetNoOperatorClients( void );
+        bool GetIfClientOperator( int client_sd );
+        bool GetIfClientInChannel( int client_sd );
     private:
         std::string         channel_concept;
         std::vector<int>    client_sd_list;
