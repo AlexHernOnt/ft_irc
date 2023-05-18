@@ -75,13 +75,13 @@ class Server {
         void ServerMsgToClient( int client_sd, std::string msgcode, std::string line ); //mensajes del servidor al cliente
         void OtherMsgToClient( int client_sd, std::string line ); //mensajes personalizados (rollo ERROR por ejemplo que son mensajes sin todo el prefijo del server)
         void SendClientMsg( int client_sd, std::string line, int target_client_sd );  //mensajes recibidos de clientes para otros clientes/canales
-        void SendClientMsgToChannel( int client_sd, std::string line, std::string channel_name ); //send client msg to channel
+        void SendClientMsgToChannel( int client_sd, std::string line, std::string channel_name, bool resendtoself = true ); //send client msg to channel
 
         //new connection (only clients available)
         void WelcomeClient( int client_sd );
 
         //utils
-        std::vector<std::string> Split( std::string data, std::string delimiter );
+        std::vector<std::string> Split( std::string data, std::string delimiter, std::string delimiter2 = "" );
         int GetUnregisteredCount( void );
         int GetClientSdByNick( std::string nick );
         bool CheckChannelName( std::string channel );

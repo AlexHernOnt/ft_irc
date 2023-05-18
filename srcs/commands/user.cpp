@@ -17,9 +17,10 @@ void Server::Command_user( int client_sd, std::string data )
     //std::cout << "ENTRA AL USER EL CLIENTE: " << client_list[client_sd].nick << " CON LOS SIGUIENTES DATOS: " << data << std::endl;
 	std::ostringstream oss;
 
-	std::vector<std::string> split_inputs = Split(data, " ");
+	std::vector<std::string> split_realname = Split(data, ":");	//0: resto de datos 1: realname
+	std::vector<std::string> split_inputs = Split(split_realname[0], " ");	//si no hay realname con : se toma la posicion 4
 
-	if (split_inputs.size() < 5) //parámetros insuficientes
+	if ((split_inputs.size() + split_realname.size() - 1) < 5) //parámetros insuficientes
 	{
 		oss << "USER :Not enough parameters";
 		ServerMsgToClient(client_sd, "461", oss.str());
@@ -39,7 +40,10 @@ void Server::Command_user( int client_sd, std::string data )
     //ok continuar
 	client_list[client_sd].user_set = true;
 	client_list[client_sd].username = split_inputs[1];
-	client_list[client_sd].realname = split_inputs[4];
+	if (split_realname.size() > 1)
+		client_list[client_sd].realname = split_realname[1];
+	else
+		client_list[client_sd].realname = split_inputs[4];
 
 	if (client_list[client_sd].registered == false)
     {

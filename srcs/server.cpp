@@ -26,6 +26,8 @@ Server::Server( void )
 	command_map["PART"] = &Server::Command_part;
 	command_map["LIST"] = &Server::Command_list;
 
+	command_map["PRIVMSG"] = &Server::Command_privmsg;
+
 	command_map["QUIT"] = &Server::Command_quit;
 }
 
@@ -189,9 +191,10 @@ void Server::MainLoop( void )
 				}
 				if (str_buffer != "")
 				{
-					std::vector<std::string> buffer_lines = Split(str_buffer, "\n");
+					std::vector<std::string> buffer_lines = Split(str_buffer, "\n", "\r");
 					for (unsigned long k = 0; k < buffer_lines.size(); k++)
 					{
+						std::cout << buffer_lines[k] << std::endl;
 						ProcessCommand(fds[i].fd, buffer_lines[k]);
 					}
 					str_buffer = "";
@@ -273,16 +276,18 @@ void Server::SendClientMsg( int client_sd, std::string line, int target_client_s
 	send(target_client_sd, formatted_msg_char, formatted_msg.size(), 0);
 }
 
-void Server::SendClientMsgToChannel( int client_sd, std::string line, std::string channel_name )
+void Server::SendClientMsgToChannel( int client_sd, std::string line, std::string channel_name, bool resendtoself )
 {
 	std::vector<int> channel_client_sd_list = channels_list.find(channel_name)->second.GetClients();
 	for( unsigned long i = 0; i < channel_client_sd_list.size(); i++ )
 	{
+		if (resendtoself == false && channel_client_sd_list[i] == client_sd)
+			continue;
 		SendClientMsg( client_sd, line, channel_client_sd_list[i]);
 	}
 }
 
-std::vector<std::string> Server::Split( std::string data, std::string delimiter )
+std::vector<std::string> Server::Split( std::string data, std::string delimiter, std::string delimiter2 )
 {
 	std::vector<std::string> split_inputs;
 
@@ -292,6 +297,12 @@ std::vector<std::string> Server::Split( std::string data, std::string delimiter 
     {
 		pos = data.find(delimiter, pos);
         std::string substring( data.substr(prev_pos, pos - prev_pos) );
+		if (delimiter2 != "")
+		{
+			std::string::size_type pos2 = data.find(delimiter2, pos);
+			if (pos2 < pos)
+				pos = pos2;
+		}
 		//std::cout << substring << " " << substring.size() << std::endl;
 		if (substring != "")
         	split_inputs.push_back(substring);

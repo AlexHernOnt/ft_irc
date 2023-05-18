@@ -17,6 +17,7 @@ void Server::Command_join( int client_sd, std::string data )
     //std::cout << "ENTRA AL JOIN EL CLIENTE: " << client_list[client_sd].nick << " CON LOS SIGUIENTES DATOS: " << data << std::endl;
     std::ostringstream oss;
 
+    //TODO: partir y usar keys (passwords de channel) si te dan
 	std::vector<std::string> split_inputs = Split(data, " ");
 
     if (client_list[client_sd].registered == false) //no registrado
