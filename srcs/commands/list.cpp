@@ -6,7 +6,7 @@
 /*   By: rgirondo <rgirondo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 19:26:17 by rgirondo          #+#    #+#             */
-/*   Updated: 2023/05/21 18:56:52 by rgirondo         ###   ########.fr       */
+/*   Updated: 2023/05/21 20:13:32 by rgirondo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,15 @@ void Server::Command_list( int client_sd, std::string data )
     {
         for (std::map<std::string, Channel>::iterator it = channels_list.begin(); it != channels_list.end(); it++)
         {
-            oss << it->first << " " << ((it->second).GetClients()).size() << " :" << (it->second).GetChannelConcept();
-    		ServerMsgToClient(client_sd, "322", oss.str());
-        	oss.str("");
-		    oss.clear();
+            if (!(it->second).GetS_Flag() || (it->second).GetIfClientInChannel(client_sd))
+            {
+                oss << it->first << " " << ((it->second).GetClients()).size() << " :";
+    		    if (!(it->second).GetP_Flag() || (it->second).GetIfClientInChannel(client_sd))
+                    oss << ((it->second)).GetChannelConcept();
+                ServerMsgToClient(client_sd, "322", oss.str());
+        	    oss.str("");
+		        oss.clear();
+            }
         }
     }
 
