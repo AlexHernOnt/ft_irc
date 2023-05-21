@@ -41,6 +41,10 @@ void Server::Command_join( int client_sd, std::string data )
     std::vector<std::string> channels = Split(split_inputs[1], ",");
     std::map<std::string,Channel>::iterator it;
 
+    std::vector<std::string> channel_keys;
+    if (split_inputs.size() >= 3)
+        channel_keys = Split(split_inputs[2], ",");
+
     for (unsigned long i = 0; i < channels.size(); i++)
     {
         if (CheckChannelName(channels[i]) == false)
@@ -59,9 +63,24 @@ void Server::Command_join( int client_sd, std::string data )
             channels_list.insert(std::pair<std::string, Channel>(channels[i], Channel()));
             it = channels_list.find(channels[i]);
         }
+        else
+        {
+            std::string try_key = "";
+            if (i < channel_keys.size())
+                try_key = channel_keys[i];
+            if (it->second.CheckKey(try_key) == false)
+            {
+                //ERR_BADCHANNELKEY (password)
+                oss << channels[i] << " :Cannot join channel (+k)";
+                ServerMsgToClient(client_sd, "475", oss.str());
+                oss.str("");
+                oss.clear();
+                continue;
+            }
+        }
         it->second.JoinClient( client_sd, false );
 
-        //TODO: ERR_CHANNELISFULL? ERR_INVITEONLYCHAN, ERR_BANNEDFROMCHAN, ERR_BADCHANNELKEY (password)
+        //TODO: ERR_CHANNELISFULL? ERR_INVITEONLYCHAN, ERR_BANNEDFROMCHAN
 
         //aviso JOIN a todos los del canal
         oss << "JOIN :" << channels[i];

@@ -14,6 +14,14 @@
 
 Channel::Channel( void )
 {
+    channel_key = "";
+    private_channel = false;
+    secret_channel = false;
+    invite_only = false;
+    topic_opr_only = false;
+    out_msg_reject = false;
+    moderated_channel = false;
+    channel_max_users = -1; //mientras sea -1 no hay límite
 }
 
 Channel::~Channel( void )
@@ -111,5 +119,14 @@ bool Channel::GetIfClientInChannel( int client_sd )
         if (client_sd_list[i] == client_sd)
             return true;
     }
+    return false;
+}
+
+bool Channel::CheckKey( std::string trying_key )
+{
+    if (channel_key == "")
+        return true;
+    if (trying_key == channel_key)
+        return true;
     return false;
 }

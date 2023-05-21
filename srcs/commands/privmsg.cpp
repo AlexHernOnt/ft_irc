@@ -29,6 +29,7 @@ void Server::Command_privmsg( int client_sd, std::string data )
 		oss.clear();
 		return;
     }
+    
     if ((split_inputs.size() + split_msg.size() - 1) < 2) //solo ha escrito PRIVMSG
 	{
 		oss << ":No recipient given (PRIVMSG)";
