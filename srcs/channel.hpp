@@ -23,6 +23,17 @@ class Channel {
         bool GetIfClientOperator( int client_sd );
         bool GetIfClientInChannel( int client_sd );
         bool CheckKey( std::string trying_key );
+
+        //channel flags getters
+        bool    GetP_Flag( void );
+        bool    GetS_Flag( void );
+        bool    GetI_Flag( void );
+        bool    GetT_Flag( void );
+        bool    GetN_Flag( void );
+        bool    GetM_Flag( void );
+        int     GetL_Flag( void );
+
+
     private:
         std::string         channel_concept;
         std::vector<int>    client_sd_list;
@@ -30,7 +41,7 @@ class Channel {
 
         std::string         channel_key;
 
-        //permisos
+        //channel flags 
         bool                private_channel;
         bool                secret_channel;
         bool                invite_only;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahernand <ahernand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rgirondo <rgirondo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/05/06 17:29:14 by ahernand         ###   ########.fr       */
+/*   Updated: 2023/05/21 18:13:51 by rgirondo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,4 +129,39 @@ bool Channel::CheckKey( std::string trying_key )
     if (trying_key == channel_key)
         return true;
     return false;
+}
+
+bool    Channel::GetP_Flag( void )
+{
+    return this->private_channel;
+}
+
+bool    Channel::GetS_Flag( void )
+{
+    return this->secret_channel;
+}
+
+bool    Channel::GetI_Flag( void )
+{
+    return this->invite_only;
+}
+
+bool    Channel::GetT_Flag( void )
+{
+    return this->topic_opr_only;
+}
+
+bool    Channel::GetN_Flag( void )
+{
+    return this->out_msg_reject;
+}
+
+bool    Channel::GetM_Flag( void )
+{
+    return this->moderated_channel;
+}
+
+int     Channel::GetL_Flag( void )
+{
+    return this->channel_max_users;
 }
