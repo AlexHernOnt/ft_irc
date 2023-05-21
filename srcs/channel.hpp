@@ -17,7 +17,6 @@ class Channel {
         void SetChannelConcept( std::string new_concept );
 
         std::string GetChannelConcept( void );
-        void GetChannelConcept( std::string concept );
         std::vector<int> GetClients( void );
         std::vector<int> GetOperators( void );
         std::vector<int> GetNoOperatorClients( void );
