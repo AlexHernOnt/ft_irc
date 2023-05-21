@@ -17,6 +17,7 @@ class Channel {
         void SetChannelConcept( std::string new_concept );
 
         std::string GetChannelConcept( void );
+        void GetChannelConcept( std::string concept );
         std::vector<int> GetClients( void );
         std::vector<int> GetOperators( void );
         std::vector<int> GetNoOperatorClients( void );
@@ -32,6 +33,15 @@ class Channel {
         bool    GetN_Flag( void );
         bool    GetM_Flag( void );
         int     GetL_Flag( void );
+
+        //channel flags setters
+        void    GetP_Flag( bool P );
+        void    GetS_Flag( bool S );
+        void    GetI_Flag( bool I );
+        void    GetT_Flag( bool T );
+        void    GetN_Flag( bool N );
+        void    GetM_Flag( bool M );
+        void    GetL_Flag( int max );
 
 
     private:
