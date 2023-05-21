@@ -6,7 +6,7 @@
 /*   By: rgirondo <rgirondo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/05/21 21:26:56 by rgirondo         ###   ########.fr       */
+/*   Updated: 2023/05/21 23:04:19 by rgirondo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,11 +69,6 @@ void Channel::SetChannelConcept( std::string new_concept )
 std::string Channel::GetChannelConcept( void )
 {
     return channel_concept;
-}
-
-void    Channel::GetChannelConcept( std::string concept )
-{
-    this->channel_concept = concept;
 }
 
 std::vector<int> Channel::GetClients( void )
