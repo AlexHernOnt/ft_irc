@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   mode.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahernand <ahernand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rgirondo <rgirondo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/05/06 17:29:14 by ahernand         ###   ########.fr       */
+/*   Updated: 2023/05/21 19:15:41 by rgirondo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,15 +30,55 @@ void Server::Command_mode( int client_sd, std::string data )
 		return;
     }
 
-    //NO SE ACEPTA LA RAMA DE USUARIO, SOLO MODE CON CHANNEL
+    if (split_inputs.size() < 2) //parámetros insuficientes
+	{
+		oss << "JOIN :Not enough parameters";
+		ServerMsgToClient(client_sd, "461", oss.str());
+		oss.str("");
+		oss.clear();
+		return;
+	}
+    
+    if (CheckChannelName(split_inputs[1]) == true)
+    {
+        //mode channel
+        if (split_inputs.size() == 2)
+        {
+            //TODO: get info
+        }
+        else
+        {
+
+        }
+    }
+    else
+    {
+        //mode client
+        if (split_inputs[1] != client_list[client_sd].nick) //si no coincide el nick con el suyo
+        {
+            oss << ":Cant change mode for other users";
+            ServerMsgToClient(client_sd, "502", oss.str());
+            oss.str("");
+            oss.clear();
+            return;
+        }
+
+        if (split_inputs.size() == 2)
+        {
+            //TODO: get info
+        }
+        else
+        {
+            //TODO: process flags
+        }
+    }
+
     /*
-        ERR_NEEDMOREPARAMS              RPL_CHANNELMODEIS
         ERR_CHANOPRIVSNEEDED            ERR_NOSUCHNICK
         ERR_NOTONCHANNEL                ERR_KEYSET
         RPL_BANLIST                     RPL_ENDOFBANLIST
         ERR_UNKNOWNMODE                 ERR_NOSUCHCHANNEL
 
-        ERR_USERSDONTMATCH              RPL_UMODEIS
         ERR_UMODEUNKNOWNFLAG
     */
 }
