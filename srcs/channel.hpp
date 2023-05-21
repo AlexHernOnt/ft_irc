@@ -24,6 +24,7 @@ class Channel {
         bool GetIfClientInChannel( int client_sd );
         bool CheckKey( std::string trying_key );
 
+        std::string GetChannelFlags( void );
         //channel flags getters
         bool    GetP_Flag( void );
         bool    GetS_Flag( void );

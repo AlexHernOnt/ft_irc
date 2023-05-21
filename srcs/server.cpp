@@ -395,6 +395,50 @@ std::string Server::GetUserFlags( int client_sd )
 
 	if (client_list[client_sd].invisible == true)
 		response += "i";
+	if (client_list[client_sd].serv_not_recv == true)
+		response += "s";
+	if (client_list[client_sd].recv_wallops == true)
+		response += "w";
+	if (client_list[client_sd].oprtor == true)
+		response += "o";
 
 	return response;
+}
+
+void Server::ProcessClientFlags( int client_sd, std::string flags )
+{
+	bool sign = true;
+	bool error_sent = false;
+	for (unsigned long i = 0; i < flags.size(); i++)
+	{
+		if (flags[i] == '+')
+		{
+			sign = true;
+		}
+		else if (flags[i] == '-')
+		{
+			sign = false;
+		}
+		else if (flags[i] == 'i')
+		{
+			client_list[client_sd].invisible = sign;
+		}
+		else if (flags[i] == 's')
+		{
+			client_list[client_sd].serv_not_recv = sign;
+		}
+		else if (flags[i] == 'w')
+		{
+			client_list[client_sd].recv_wallops = sign;
+		}
+		else if (flags[i] == 'o' && sign == false)
+		{
+			client_list[client_sd].oprtor = false;
+		}
+		else if (error_sent == false)
+		{
+			ServerMsgToClient(client_sd, "501", ":Unknown MODE flag");
+			error_sent = true;
+		}
+	}
 }
