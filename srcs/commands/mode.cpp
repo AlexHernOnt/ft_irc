@@ -73,7 +73,7 @@ void Server::Command_mode( int client_sd, std::string data )
         }
         else
         {
-            //TODO: process flags
+            ProcessClientFlags(client_sd, split_inputs[2]);
         }
     }
 

@@ -29,7 +29,7 @@
 	 
 struct client_data{
 	client_data()
-		: nick("*"), username(""), realname(""), password_passed(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), password_ok(false), registered(false), invisible(false) {}
+		: nick("*"), username(""), realname(""), password_passed(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), password_ok(false), registered(false), invisible(false), serv_not_recv(false), recv_wallops(false), oprtor(false) {}
 
   	std::string		nick;
     std::string     username;
@@ -50,9 +50,10 @@ struct client_data{
     bool            registered;
 
     //other
-    bool            invisible;
-
-    bool            oprtor;
+    bool            invisible;      //i
+    bool            serv_not_recv;  //s
+    bool            recv_wallops;   //w
+    bool            oprtor;         //o
 };
 
 class Server {
@@ -93,6 +94,7 @@ class Server {
         int GetClientSdByNick( std::string nick );
         bool CheckChannelName( std::string channel );
         std::string GetUserFlags( int client_sd );
+        void ProcessClientFlags( int client_sd, std::string flags );
 
         //commands
         void ProcessCommand( int client_sd, std::string line );
