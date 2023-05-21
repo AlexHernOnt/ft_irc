@@ -35,13 +35,13 @@ class Channel {
         int     GetL_Flag( void );
 
         //channel flags setters
-        void    GetP_Flag( bool P );
-        void    GetS_Flag( bool S );
-        void    GetI_Flag( bool I );
-        void    GetT_Flag( bool T );
-        void    GetN_Flag( bool N );
-        void    GetM_Flag( bool M );
-        void    GetL_Flag( int max );
+        void    SetP_Flag( bool P );
+        void    SetS_Flag( bool S );
+        void    SetI_Flag( bool I );
+        void    SetT_Flag( bool T );
+        void    SetN_Flag( bool N );
+        void    SetM_Flag( bool M );
+        void    SetL_Flag( int max );
 
 
     private:
