@@ -18,7 +18,7 @@ void Server::Command_kick( int client_sd, std::string data )
     //std::cout << "ENTRA AL KICK EL CLIENTE: " << client_list[client_sd].nick << " CON LOS SIGUIENTES DATOS: " << data << std::endl;
     std::ostringstream oss;
 
-    std::vector<std::string> split_msg = Split(data, ":");
+    std::vector<std::string> split_msg = SplitMsg(data);
 	std::vector<std::string> split_inputs = Split(split_msg[0], " ");
     if (client_list[client_sd].registered == false) //no registrado
 	{

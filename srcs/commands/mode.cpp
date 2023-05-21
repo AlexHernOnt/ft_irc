@@ -65,7 +65,11 @@ void Server::Command_mode( int client_sd, std::string data )
 
         if (split_inputs.size() == 2)
         {
-            //TODO: get info
+            oss << GetUserFlags(client_sd);
+            ServerMsgToClient(client_sd, "221", oss.str());
+            oss.str("");
+            oss.clear();
+            return;
         }
         else
         {

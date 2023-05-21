@@ -17,7 +17,7 @@ void Server::Command_user( int client_sd, std::string data )
     //std::cout << "ENTRA AL USER EL CLIENTE: " << client_list[client_sd].nick << " CON LOS SIGUIENTES DATOS: " << data << std::endl;
 	std::ostringstream oss;
 
-	std::vector<std::string> split_realname = Split(data, ":");	//0: resto de datos 1: realname
+	std::vector<std::string> split_realname = SplitMsg(data);	//0: resto de datos 1: realname
 	std::vector<std::string> split_inputs = Split(split_realname[0], " ");	//si no hay realname con : se toma la posicion 4
 
 	if ((split_inputs.size() + split_realname.size() - 1) < 5) //parámetros insuficientes
@@ -78,8 +78,7 @@ void Server::WelcomeClient( int client_sd )
 	oss.str("");
 	oss.clear();
 
-	//MOTIVO: se refiere a los OPERADORES DE SERVIDOR cosa que no hay implementado en nuestro servicio
-	oss <<  "0 :operators online";
+	oss << GetOperatorCount() << " :operators online";
 	ServerMsgToClient(client_sd, "252", oss.str());
 	oss.str("");
 	oss.clear();

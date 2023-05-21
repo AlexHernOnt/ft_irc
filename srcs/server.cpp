@@ -322,6 +322,28 @@ std::vector<std::string> Server::Split( std::string data, std::string delimiter,
 	return split_inputs;
 }
 
+std::vector<std::string> Server::SplitMsg( std::string data )
+{
+	std::vector<std::string> split_inputs;
+
+	std::string::size_type prev_pos = 0, pos = 0;
+
+    pos = data.find(":", pos);
+	std::string substring( data.substr(prev_pos, pos - prev_pos) );
+	if (substring != "")
+		split_inputs.push_back(substring);
+
+	if (pos == std::string::npos)
+		return split_inputs;
+	prev_pos = ++pos;
+
+	std::string substring2( data.substr(prev_pos) );
+	if (substring2 != "")
+		split_inputs.push_back(substring2);
+
+	return split_inputs;
+}
+
 int Server::GetUnregisteredCount( void )
 {
 	int num_registered = 0;
@@ -331,6 +353,17 @@ int Server::GetUnregisteredCount( void )
 			num_registered++;
 	}
 	return num_registered;
+}
+
+int Server::GetOperatorCount( void )
+{
+	int num_oprtor = 0;
+	for (std::map<int, client_data>::iterator i_client = client_list.begin(); i_client != client_list.end(); std::advance(i_client, 1))
+	{
+		if (i_client->second.oprtor == true)
+			num_oprtor++;
+	}
+	return num_oprtor;
 }
 
 int Server::GetClientSdByNick( std::string nick )
@@ -354,4 +387,14 @@ bool Server::CheckChannelName( std::string channel )
             return false;
     }
 	return true;
+}
+
+std::string Server::GetUserFlags( int client_sd )
+{
+	std::string response = "+";
+
+	if (client_list[client_sd].invisible == true)
+		response += "i";
+
+	return response;
 }
