@@ -17,10 +17,11 @@ void Server::Command_privmsg( int client_sd, std::string data )
     //std::cout << "ENTRA AL PRIVMSG EL CLIENTE: " << client_list[client_sd].nick << " CON LOS SIGUIENTES DATOS: " << data << std::endl;
     std::ostringstream oss;
 
-    std::vector<std::string> split_msg = Split(data, ":");
+    std::vector<std::string> split_msg = SplitMsg(data);
 	std::vector<std::string> split_inputs = Split(split_msg[0], " ");
     std::string msg;
 
+    //PRIVMSG brem Hola == PRIVMSG brem :Hola
     if (client_list[client_sd].registered == false) //no registrado
 	{
 		oss << ":You have not registered";
@@ -29,7 +30,7 @@ void Server::Command_privmsg( int client_sd, std::string data )
 		oss.clear();
 		return;
     }
-    
+
     if ((split_inputs.size() + split_msg.size() - 1) < 2) //solo ha escrito PRIVMSG
 	{
 		oss << ":No recipient given (PRIVMSG)";
