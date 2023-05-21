@@ -41,14 +41,62 @@ void Server::Command_mode( int client_sd, std::string data )
     
     if (CheckChannelName(split_inputs[1]) == true)
     {
+        std::map<std::string, Channel>::iterator channel = channels_list.find(split_inputs[1]);
+        if (channel == channels_list.end())
+        {
+            oss << split_inputs[1] << " :No such channel";
+            ServerMsgToClient(client_sd, "403", oss.str());
+            oss.str("");
+            oss.clear();
+            return;
+        }
         //mode channel
         if (split_inputs.size() == 2)
         {
             //TODO: get info
+            oss << split_inputs[1] << " " << channel->second.GetChannelFlags();;
+            ServerMsgToClient(client_sd, "324", oss.str());
+            oss.str("");
+            oss.clear();
+            return;
         }
         else
         {
-
+            //TODO
+            /*
+                o - give/take channel operator privileges;
+                p - private channel flag;
+                s - secret channel flag;
+                i - invite-only channel flag;
+                t - topic settable by channel operator only flag;
+                n - no messages to channel from clients on the outside;
+                m - moderated channel;
+                l - set the user limit to channel;
+                b - set a ban mask to keep users out;
+                v - give/take the ability to speak on a moderated channel;
+                k - set a channel key (password).
+            */
+            //add flags
+            bool sign = true;
+            for (unsigned long i = 0; i < split_inputs[2].size(); i++)
+            {
+                if (split_inputs[2][i] == '+')
+                {
+                    sign = true;
+                }
+                else if (split_inputs[2][i] == '-')
+                {
+                    sign = false;
+                }
+                //faltan las flags
+                else
+                {
+                    oss << split_inputs[2][i] << " :is unknown mode char to me";
+                    ServerMsgToClient(client_sd, "472", oss.str());
+                    oss.str("");
+                    oss.clear();
+                }
+            }
         }
     }
     else
@@ -73,6 +121,7 @@ void Server::Command_mode( int client_sd, std::string data )
         }
         else
         {
+            //add flags
             ProcessClientFlags(client_sd, split_inputs[2]);
         }
     }
@@ -81,8 +130,5 @@ void Server::Command_mode( int client_sd, std::string data )
         ERR_CHANOPRIVSNEEDED            ERR_NOSUCHNICK
         ERR_NOTONCHANNEL                ERR_KEYSET
         RPL_BANLIST                     RPL_ENDOFBANLIST
-        ERR_UNKNOWNMODE                 ERR_NOSUCHCHANNEL
-
-        ERR_UMODEUNKNOWNFLAG
     */
 }

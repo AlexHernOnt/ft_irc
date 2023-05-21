@@ -136,6 +136,16 @@ bool Channel::CheckKey( std::string trying_key )
     return false;
 }
 
+std::string Channel::GetChannelFlags( void )
+{
+    std::string response = "+";
+
+	if (channel_key != "")
+		response += "k";
+
+    return response;
+}
+
 bool    Channel::GetP_Flag( void )
 {
     return this->private_channel;
