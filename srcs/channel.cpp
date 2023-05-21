@@ -6,7 +6,7 @@
 /*   By: rgirondo <rgirondo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/05/21 18:13:51 by rgirondo         ###   ########.fr       */
+/*   Updated: 2023/05/21 21:02:37 by rgirondo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,11 @@ void Channel::SetChannelConcept( std::string new_concept )
 std::string Channel::GetChannelConcept( void )
 {
     return channel_concept;
+}
+
+void    Channel::GetChannelConcept( std::string concept )
+{
+    this->channel_concept = concept;
 }
 
 std::vector<int> Channel::GetClients( void )
@@ -164,4 +169,39 @@ bool    Channel::GetM_Flag( void )
 int     Channel::GetL_Flag( void )
 {
     return this->channel_max_users;
+}
+
+void    Channel::GetP_Flag( bool P )
+{
+    this->private_channel = P;
+}
+
+void    Channel::GetS_Flag( bool S )
+{
+    this->secret_channel = S;
+}
+
+void    Channel::GetI_Flag( bool I )
+{
+    this->invite_only = I;
+}
+
+void    Channel::GetT_Flag( bool T )
+{
+    this->topic_opr_only = T;
+}
+
+void    Channel::GetN_Flag( bool N )
+{
+    this->out_msg_reject = N;
+}
+
+void    Channel::GetM_Flag( bool M )
+{
+    this->moderated_channel = M;
+}
+
+void    Channel::GetL_Flag( int max )
+{
+    this->channel_max_users = max;
 }
