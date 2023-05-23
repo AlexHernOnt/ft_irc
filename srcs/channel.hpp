@@ -17,6 +17,7 @@ class Channel {
         void MakeOperator( int client_sd );
         void UnmakeOperator( int client_sd );
         void SetChannelConcept( std::string new_concept );
+        void SendInvitation ( int client_sd );
 
         std::string GetChannelConcept( void );
         std::vector<int> GetClients( void );
@@ -58,6 +59,7 @@ class Channel {
     private:
         std::string         channel_concept;
         std::vector<int>    client_sd_list;
+        std::vector<int>    invited_clients_sd;
         std::vector<int>    oprtor_sd_list;
         std::vector<std::string>    ban_mask_list;
         std::vector<int>    moderated_channel_allowed; //allowed client_sd in a moderated channel to send msgs to channel
