@@ -62,9 +62,18 @@ void Server::Command_mode( int client_sd, std::string data )
         }
         else
         {
+            //set info
+            if (channel->second.GetIfClientOperator(client_sd) == false) //check if opr
+            {
+                oss << split_inputs[1] << " :You're not channel operator";
+                ServerMsgToClient(client_sd, "482", oss.str());
+                oss.str("");
+                oss.clear();
+                return;
+            }
             //TODO
             /*
-                o - give/take channel operator privileges;
+                o - give/take channel operator privileges; X
                 p - private channel flag;
                 s - secret channel flag;
                 i - invite-only channel flag;
@@ -77,6 +86,7 @@ void Server::Command_mode( int client_sd, std::string data )
                 k - set a channel key (password).
             */
             //add flags
+            int propertyIndex = 3;
             bool sign = true;
             for (unsigned long i = 0; i < split_inputs[2].size(); i++)
             {
@@ -87,6 +97,46 @@ void Server::Command_mode( int client_sd, std::string data )
                 else if (split_inputs[2][i] == '-')
                 {
                     sign = false;
+                }
+                else if (split_inputs[2][i] == 'o')
+                {
+                    int target_client_sd = GetClientSdByNick(split_inputs[propertyIndex]);
+                    if (target_client_sd == -1)
+                    {
+                        oss << split_inputs[propertyIndex] << " :No such nick/channel";
+                        ServerMsgToClient(client_sd, "401", oss.str());
+                        oss.str("");
+                        oss.clear();
+                        propertyIndex++;
+                        continue;
+                    }
+                    if (channels_list[split_inputs[1]].GetIfClientInChannel(target_client_sd) == false)
+                    {
+                        oss << split_inputs[propertyIndex] << " " << split_inputs[1] << " :They aren't on that channel";
+                        ServerMsgToClient(client_sd, "441", oss.str());
+                        oss.str("");
+                        oss.clear();
+                        propertyIndex++;
+                        continue;
+                    }
+                    if (sign == true)
+                    {
+                        channels_list[split_inputs[1]].MakeOperator( target_client_sd );
+                        oss << "MODE " << split_inputs[1] << " +o " << split_inputs[propertyIndex];
+                        SendClientMsgToChannel(client_sd, data, split_inputs[1]);
+                        oss.str("");
+                        oss.clear();
+                    }
+                    else
+                    {
+                        channels_list[split_inputs[1]].UnmakeOperator( target_client_sd );
+                        oss << "MODE " << split_inputs[1] << " -o " << split_inputs[propertyIndex];
+                        SendClientMsgToChannel(client_sd, data, split_inputs[1]);
+                        oss.str("");
+                        oss.clear();
+                    }
+                    
+                    propertyIndex++;
                 }
                 //faltan las flags
                 else

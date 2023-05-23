@@ -14,6 +14,8 @@ class Channel {
 
         int JoinClient( int client_sd, bool oprtor );
         bool PartClient( int client_sd ); //return false if not found
+        void MakeOperator( int client_sd );
+        void UnmakeOperator( int client_sd );
         void SetChannelConcept( std::string new_concept );
 
         std::string GetChannelConcept( void );

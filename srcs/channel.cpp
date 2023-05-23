@@ -61,6 +61,20 @@ bool Channel::PartClient( int client_sd )
     return true;
 }
 
+void Channel::MakeOperator( int client_sd )
+{
+    if (GetIfClientOperator(client_sd) == true)
+        return;
+    oprtor_sd_list.push_back(client_sd);
+}
+
+void Channel::UnmakeOperator( int client_sd )
+{
+    std::vector<int>::iterator i_client = std::find(oprtor_sd_list.begin(), oprtor_sd_list.end(), client_sd);
+    if (i_client != oprtor_sd_list.end())
+        oprtor_sd_list.erase(i_client);
+}
+
 void Channel::SetChannelConcept( std::string new_concept )
 {
     channel_concept = new_concept;
