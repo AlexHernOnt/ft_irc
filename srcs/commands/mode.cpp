@@ -74,19 +74,19 @@ void Server::Command_mode( int client_sd, std::string data )
             //TODO
             /*
                 o - give/take channel operator privileges; X
-                p - private channel flag;
-                s - secret channel flag;
-                i - invite-only channel flag;
-                t - topic settable by channel operator only flag;
-                n - no messages to channel from clients on the outside;
-                m - moderated channel;
-                l - set the user limit to channel;
+                p - private channel flag; X
+                s - secret channel flag; X
+                i - invite-only channel flag; X
+                t - topic settable by channel operator only flag; X
+                n - no messages to channel from clients on the outside; XX
+                m - moderated channel; X
+                l - set the user limit to channel; X
                 b - set a ban mask to keep users out;
                 v - give/take the ability to speak on a moderated channel;
-                k - set a channel key (password).
+                k - set a channel key (password). X
             */
             //add flags
-            int propertyIndex = 3;
+            unsigned long propertyIndex = 3;
             bool sign = true;
             for (unsigned long i = 0; i < split_inputs[2].size(); i++)
             {
@@ -120,24 +120,73 @@ void Server::Command_mode( int client_sd, std::string data )
                         continue;
                     }
                     if (sign == true)
-                    {
                         channels_list[split_inputs[1]].MakeOperator( target_client_sd );
-                        oss << "MODE " << split_inputs[1] << " +o " << split_inputs[propertyIndex];
-                        SendClientMsgToChannel(client_sd, data, split_inputs[1]);
+                    else
+                        channels_list[split_inputs[1]].UnmakeOperator( target_client_sd );
+                    
+                    propertyIndex++;
+                }
+                else if (split_inputs[2][i] == 'p')
+                    channels_list[split_inputs[1]].SetP_Flag(sign);
+                else if (split_inputs[2][i] == 's')
+                    channels_list[split_inputs[1]].SetS_Flag(sign);
+                else if (split_inputs[2][i] == 'i')
+                    channels_list[split_inputs[1]].SetI_Flag(sign);
+                else if (split_inputs[2][i] == 't')
+                    channels_list[split_inputs[1]].SetT_Flag(sign);
+                else if (split_inputs[2][i] == 'n')
+                    channels_list[split_inputs[1]].SetN_Flag(sign);
+                else if (split_inputs[2][i] == 'm')
+                    channels_list[split_inputs[1]].SetM_Flag(sign);
+                else if (split_inputs[2][i] == 'l')
+                {
+                    channels_list[split_inputs[1]].SetL_Flag(std::stoi(split_inputs[propertyIndex]));
+                    propertyIndex++;
+                }
+                else if (split_inputs[2][i] == 'b')
+                {
+                    if (propertyIndex >= split_inputs.size())
+                    {
+                        //get
+                        std::vector<std::string> masks = channels_list[split_inputs[1]].GetBanMasks();
+                        for (unsigned long j = 0; j < masks.size(); j++)
+                        {
+                            //TODO: por lo que aparece aquí tiene que aparecer quien ha puesto la máscara (y el tiempo, supongo). Comprobar
+                            //:nonstop.ix.me.dal.net 367 brem #brem brem!*@* brem!~brema@ab8a-3fb1-ae2a-60ff-44c3.55.195.ip 1684850073
+                            oss << split_inputs[1] << " " << masks[j];
+                            ServerMsgToClient(client_sd, "367", oss.str());
+                            oss.str("");
+                            oss.clear();
+                        }
+                        oss << split_inputs[1] << " :End of Channel Ban List";
+                        ServerMsgToClient(client_sd, "368", oss.str());
                         oss.str("");
                         oss.clear();
                     }
                     else
                     {
-                        channels_list[split_inputs[1]].UnmakeOperator( target_client_sd );
-                        oss << "MODE " << split_inputs[1] << " -o " << split_inputs[propertyIndex];
-                        SendClientMsgToChannel(client_sd, data, split_inputs[1]);
-                        oss.str("");
-                        oss.clear();
+                        //set or remove
+                        if (sign == true)
+                        {
+                            channels_list[split_inputs[1]].SetBanMask(split_inputs[propertyIndex]);
+                            propertyIndex++;
+                        }
+                        else
+                        {
+                            channels_list[split_inputs[1]].RemoveBanMask(split_inputs[propertyIndex]);
+                            propertyIndex++;
+                        }
                     }
-                    
+                }
+                else if (split_inputs[2][i] == 'v')
+                {
+                }
+                else if (split_inputs[2][i] == 'k')
+                {
+                    channels_list[split_inputs[1]].SetKey(split_inputs[propertyIndex]);
                     propertyIndex++;
                 }
+                    
                 //faltan las flags
                 else
                 {
@@ -148,6 +197,10 @@ void Server::Command_mode( int client_sd, std::string data )
                 }
             }
         }
+        oss << data;
+        SendClientMsgToChannel(client_sd, data, split_inputs[1]);
+        oss.str("");
+        oss.clear();
     }
     else
     {

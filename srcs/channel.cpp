@@ -145,6 +145,39 @@ bool Channel::CheckKey( std::string trying_key )
     return false;
 }
 
+void Channel::SetKey( std::string new_key )
+{
+    channel_key = new_key;
+}
+
+bool Channel::GetIfNickBanned( std::string nick )
+{
+    for (unsigned long i = 0; i < ban_mask_list.size(); i++)
+    {
+        //TODO: si eso tendríamos que meter cosas de wildcards como que si pones brem* todo lo que sea bremXXXXX va a ser baneado
+        if (nick == ban_mask_list[i])
+            return true;
+    }
+    return false;
+}
+
+std::vector<std::string> Channel::GetBanMasks( void )
+{
+    return ban_mask_list;
+}
+
+void Channel::SetBanMask( std::string mask )
+{
+    ban_mask_list.push_back(mask);
+}
+
+void Channel::RemoveBanMask( std::string mask )
+{
+    std::vector<std::string>::iterator i_mask = std::find(ban_mask_list.begin(), ban_mask_list.end(), mask);
+    if (i_mask != ban_mask_list.end())
+        ban_mask_list.erase(i_mask);
+}
+
 std::string Channel::GetChannelFlags( void )
 {
     std::string response = "+";

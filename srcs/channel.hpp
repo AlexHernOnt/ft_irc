@@ -25,6 +25,13 @@ class Channel {
         bool GetIfClientOperator( int client_sd );
         bool GetIfClientInChannel( int client_sd );
         bool CheckKey( std::string trying_key );
+        void SetKey( std::string new_key );
+
+        bool GetIfNickBanned( std::string nick );
+        std::vector<std::string> GetBanMasks( void );
+        void SetBanMask( std::string mask );
+        void RemoveBanMask( std::string mask );
+        
 
         std::string GetChannelFlags( void );
         //channel flags getters
@@ -50,6 +57,8 @@ class Channel {
         std::string         channel_concept;
         std::vector<int>    client_sd_list;
         std::vector<int>    oprtor_sd_list;
+        std::vector<std::string>    ban_mask_list;
+        std::vector<int>    moderated_channel_allowed; //allowed client_sd in a moderated channel to send msgs to channel
 
         std::string         channel_key;
 
