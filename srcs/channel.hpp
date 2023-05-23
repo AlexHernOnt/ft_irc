@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
 
 class Channel {
 
@@ -17,7 +18,8 @@ class Channel {
         void MakeOperator( int client_sd );
         void UnmakeOperator( int client_sd );
         void SetChannelConcept( std::string new_concept );
-        void SendInvitation ( int client_sd );
+        void AddInvitedClient ( int client_sd );
+        void RemoveInvited ( int client_sd );
 
         std::string GetChannelConcept( void );
         std::vector<int> GetClients( void );
@@ -35,6 +37,8 @@ class Channel {
         void AllowUserMsg( int client_sd );
         void DeclineUserMsg( int client_sd );
         bool GetIfFull( void );
+        bool GetIfClientCanSpeak( int client_sd );
+        bool GetIfClientInvited ( int client_sd );
         
 
         std::string GetChannelFlags( void );

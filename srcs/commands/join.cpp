@@ -77,13 +77,11 @@ void Server::Command_join( int client_sd, std::string data )
                 continue;
             }
         }
-        it->second.JoinClient( client_sd, false );
 
-        //TODO: ERR_INVITEONLYCHAN
-        if (it->second.GetIfNickBanned() == true)
+        if (it->second.GetIfNickBanned( client_list[client_sd].nick ) == true)
         {
             oss << split_inputs[1] << " :Cannot join channel (+b)";
-            ServerMsgToClient(client_sd, "471", oss.str());
+            ServerMsgToClient(client_sd, "474", oss.str());
             oss.str("");
             oss.clear();
             return;
@@ -97,6 +95,16 @@ void Server::Command_join( int client_sd, std::string data )
             oss.clear();
             return;
         }
+
+        if (it->second.GetI_Flag() == true && it->second.GetIfClientInvited(client_sd) == false)
+        {
+            oss << split_inputs[1] << " :Cannot join channel (+i)";
+            ServerMsgToClient(client_sd, "473", oss.str());
+            oss.str("");
+            oss.clear();
+            return;
+        }
+        it->second.JoinClient( client_sd, false );
 
         //aviso JOIN a todos los del canal
         oss << "JOIN :" << channels[i];

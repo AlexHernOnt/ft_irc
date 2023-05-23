@@ -138,13 +138,28 @@ bool Channel::GetIfClientInChannel( int client_sd )
 
 bool Channel::GetIfClientCanSpeak( int client_sd )
 {
-    std::vector<std::string>::iterator i_client = std::find(oprtor_sd_list.begin(), oprtor_sd_list.end(), client_sd);
-    if (i_client != ban_mask_list.end())
+    std::vector<int>::iterator i_client = std::find(oprtor_sd_list.begin(), oprtor_sd_list.end(), client_sd);
+    if (i_client != oprtor_sd_list.end())
         return true;
     i_client = std::find(moderated_channel_allowed.begin(), moderated_channel_allowed.end(), client_sd);
     if (i_client != moderated_channel_allowed.end())
         return true;
     return false;
+}
+
+bool Channel::GetIfClientInvited ( int client_sd )
+{
+    std::vector<int>::iterator i_client = std::find(invited_clients_sd.begin(), invited_clients_sd.end(), client_sd);
+    if (i_client == invited_clients_sd.end())
+        return false;
+    return true;
+}
+
+void Channel::RemoveInvited ( int client_sd )
+{
+    std::vector<int>::iterator i_client = std::find(invited_clients_sd.begin(), invited_clients_sd.end(), client_sd);
+    if (i_client != invited_clients_sd.end())
+        invited_clients_sd.erase(i_client);
 }
 
 bool Channel::CheckKey( std::string trying_key )
@@ -209,17 +224,17 @@ std::string Channel::GetChannelFlags( void )
     std::ostringstream oss;
     oss << "+";
     /*
-                p - private channel flag;
-                s - secret channel flag;
-                i - invite-only channel flag;
-                t - topic settable by channel operator only flag;
-                n - no messages to channel from clients on the outside;
-                m - moderated channel;
-                l - set the user limit to channel;
-                b - set a ban mask to keep users out;
-                v - give/take the ability to speak on a moderated channel;
-                k - set a channel key (password).
-            */
+        p - private channel flag;
+        s - secret channel flag;
+        i - invite-only channel flag;
+        t - topic settable by channel operator only flag;
+        n - no messages to channel from clients on the outside;
+        m - moderated channel;
+        l - set the user limit to channel;
+        b - set a ban mask to keep users out;
+        v - give/take the ability to speak on a moderated channel;
+        k - set a channel key (password).
+    */
             
     if (private_channel == true)
 		oss << "p";
@@ -250,7 +265,8 @@ bool Channel::GetIfFull( void )
 {
     if (channel_max_users == -1)
         return false;
-    if (channel_max_users < client_sd_list.size())
+    unsigned long m_users = channel_max_users;
+    if (m_users < client_sd_list.size())
         return false;
     return true;
 }
@@ -325,7 +341,7 @@ void    Channel::SetL_Flag( int max )
     this->channel_max_users = max;
 }
 
-void Channel::SendInvitation ( int client_sd )
+void Channel::AddInvitedClient ( int client_sd )
 {
     for (size_t it = 0; it < invited_clients_sd.size(); it++)
     {

@@ -186,7 +186,6 @@ void Server::Command_mode( int client_sd, std::string data )
                 }
                 else if (split_inputs[2][i] == 'k')
                 {
-                    if (channels_list[split_inputs[1]].)
                     channels_list[split_inputs[1]].SetKey(split_inputs[propertyIndex]);
                     propertyIndex++;
                 }

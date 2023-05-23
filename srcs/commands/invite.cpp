@@ -47,7 +47,7 @@ void Server::Command_invite( int client_sd, std::string data )
         return ;
     }
 
-    if ((ch_it->second).GetP_Flag() == true && (ch_it->second).GetIfClientOperator(client_sd) == false) // no privileges to invite in this channel ERR_CHANOPRIVSNEEDED
+    if ((ch_it->second).GetIfClientOperator(client_sd) == false) // no privileges to invite in this channel ERR_CHANOPRIVSNEEDED
     {
         oss << ch_it->first << " :You're not channel operator";
         ServerMsgToClient(client_sd, "482", oss.str());
@@ -67,7 +67,7 @@ void Server::Command_invite( int client_sd, std::string data )
         return;
     }
 
-    if ((ch_it->second).GetIfClientInChannel(target_client_sd)) // user already in the channel ERR_USERONCHANNEL
+    if ((ch_it->second).GetIfClientInChannel(target_client_sd) == true) // user already in the channel ERR_USERONCHANNEL
     {
         oss << split_inputs[1] << " " << ch_it->first << " :is already on channel";
         ServerMsgToClient(client_sd, "443", oss.str());
@@ -78,9 +78,12 @@ void Server::Command_invite( int client_sd, std::string data )
 
     if (ch_it != channels_list.end()) // if channel exists send invitation RPL_INVITING
     {
-        (ch_it->second).SendInvitation(target_client_sd);
+        (ch_it->second).AddInvitedClient(target_client_sd);
         oss << split_inputs[1] << " " << ch_it->first;
         ServerMsgToClient(client_sd, "341", oss.str());
+        oss.str("");
+        oss.clear();
+        oss << "INVITE " << split_inputs[1] << " " << ch_it->first;
         SendClientMsg(client_sd, oss.str(), target_client_sd);
         oss.str("");
         oss.clear();
