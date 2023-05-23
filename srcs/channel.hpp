@@ -31,6 +31,8 @@ class Channel {
         std::vector<std::string> GetBanMasks( void );
         void SetBanMask( std::string mask );
         void RemoveBanMask( std::string mask );
+        void AllowUserMsg( int client_sd );
+        void DeclineUserMsg( int client_sd );
         
 
         std::string GetChannelFlags( void );

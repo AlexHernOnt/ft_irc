@@ -78,11 +78,11 @@ void Server::Command_mode( int client_sd, std::string data )
                 s - secret channel flag; X
                 i - invite-only channel flag; X
                 t - topic settable by channel operator only flag; X
-                n - no messages to channel from clients on the outside; XX
+                n - no messages to channel from clients on the outside; X
                 m - moderated channel; X
                 l - set the user limit to channel; X
-                b - set a ban mask to keep users out;
-                v - give/take the ability to speak on a moderated channel;
+                b - set a ban mask to keep users out; X
+                v - give/take the ability to speak on a moderated channel; X
                 k - set a channel key (password). X
             */
             //add flags
@@ -151,8 +151,6 @@ void Server::Command_mode( int client_sd, std::string data )
                         std::vector<std::string> masks = channels_list[split_inputs[1]].GetBanMasks();
                         for (unsigned long j = 0; j < masks.size(); j++)
                         {
-                            //TODO: por lo que aparece aquí tiene que aparecer quien ha puesto la máscara (y el tiempo, supongo). Comprobar
-                            //:nonstop.ix.me.dal.net 367 brem #brem brem!*@* brem!~brema@ab8a-3fb1-ae2a-60ff-44c3.55.195.ip 1684850073
                             oss << split_inputs[1] << " " << masks[j];
                             ServerMsgToClient(client_sd, "367", oss.str());
                             oss.str("");
@@ -180,6 +178,14 @@ void Server::Command_mode( int client_sd, std::string data )
                 }
                 else if (split_inputs[2][i] == 'v')
                 {
+                    int target_client_sd = GetClientSdByNick(split_inputs[propertyIndex]);
+                    if (target_client_sd != -1)
+                    {
+                        if (sign == true)
+                            channels_list[split_inputs[1]].AllowUserMsg(target_client_sd);
+                        else
+                            channels_list[split_inputs[1]].DeclineUserMsg(target_client_sd);
+                    }
                 }
                 else if (split_inputs[2][i] == 'k')
                 {

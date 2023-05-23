@@ -168,7 +168,9 @@ std::vector<std::string> Channel::GetBanMasks( void )
 
 void Channel::SetBanMask( std::string mask )
 {
-    ban_mask_list.push_back(mask);
+    std::vector<std::string>::iterator i_mask = std::find(ban_mask_list.begin(), ban_mask_list.end(), mask);
+    if (i_mask == ban_mask_list.end())
+        ban_mask_list.push_back(mask);
 }
 
 void Channel::RemoveBanMask( std::string mask )
@@ -176,6 +178,20 @@ void Channel::RemoveBanMask( std::string mask )
     std::vector<std::string>::iterator i_mask = std::find(ban_mask_list.begin(), ban_mask_list.end(), mask);
     if (i_mask != ban_mask_list.end())
         ban_mask_list.erase(i_mask);
+}
+
+void Channel::AllowUserMsg( int client_sd )
+{
+    std::vector<int>::iterator i_client = std::find(moderated_channel_allowed.begin(), moderated_channel_allowed.end(), client_sd);
+    if (i_client == moderated_channel_allowed.end())
+        moderated_channel_allowed.push_back(client_sd);
+}
+
+void Channel::DeclineUserMsg( int client_sd )
+{
+    std::vector<int>::iterator i_client = std::find(moderated_channel_allowed.begin(), moderated_channel_allowed.end(), client_sd);
+    if (i_client != moderated_channel_allowed.end())
+        moderated_channel_allowed.erase(i_client);
 }
 
 std::string Channel::GetChannelFlags( void )
