@@ -26,6 +26,9 @@
 #define DEFAULT_PASSWORD	"1234" 
 #define DEFAULT_PORT	    6667 
 #define MAX_CLIENTS         30
+
+#define OPR_USER            "admin"
+#define OPR_PASSWORD        "quieroseroperador123" 
 	 
 struct client_data{
 	client_data()
@@ -103,6 +106,9 @@ class Server {
         void Command_pass( int client_sd, std::string data );   //sets password
         void Command_nick( int client_sd, std::string data );   //sets nickname
         void Command_user( int client_sd, std::string data );   //sets user variables
+
+        //  operator (WIP: esto no vamos a implementarlo del todo; solo existe para cubrir el MODE -o y la cuenta de operadores en el welcome)
+        void Command_oper( int client_sd, std::string data );   //become a server operator
 
         //  other commands
         void Command_quit( int client_sd, std::string data );   //end connection (client sent message example: "ERROR :Closing Link: 195.55.210.171 (Quit: potato)")

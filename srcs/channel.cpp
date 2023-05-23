@@ -136,6 +136,17 @@ bool Channel::GetIfClientInChannel( int client_sd )
     return false;
 }
 
+bool Channel::GetIfClientCanSpeak( int client_sd )
+{
+    std::vector<std::string>::iterator i_client = std::find(oprtor_sd_list.begin(), oprtor_sd_list.end(), client_sd);
+    if (i_client != ban_mask_list.end())
+        return true;
+    i_client = std::find(moderated_channel_allowed.begin(), moderated_channel_allowed.end(), client_sd);
+    if (i_client != moderated_channel_allowed.end())
+        return true;
+    return false;
+}
+
 bool Channel::CheckKey( std::string trying_key )
 {
     if (channel_key == "")
@@ -154,7 +165,6 @@ bool Channel::GetIfNickBanned( std::string nick )
 {
     for (unsigned long i = 0; i < ban_mask_list.size(); i++)
     {
-        //TODO: si eso tendríamos que meter cosas de wildcards como que si pones brem* todo lo que sea bremXXXXX va a ser baneado
         if (nick == ban_mask_list[i])
             return true;
     }
@@ -196,12 +206,53 @@ void Channel::DeclineUserMsg( int client_sd )
 
 std::string Channel::GetChannelFlags( void )
 {
-    std::string response = "+";
-
+    std::ostringstream oss;
+    oss << "+";
+    /*
+                p - private channel flag;
+                s - secret channel flag;
+                i - invite-only channel flag;
+                t - topic settable by channel operator only flag;
+                n - no messages to channel from clients on the outside;
+                m - moderated channel;
+                l - set the user limit to channel;
+                b - set a ban mask to keep users out;
+                v - give/take the ability to speak on a moderated channel;
+                k - set a channel key (password).
+            */
+            
+    if (private_channel == true)
+		oss << "p";
+    if (secret_channel == true)
+		oss << "s";
+    if (invite_only == true)
+		oss << "i";
+    if (topic_opr_only == true)
+		oss << "t";
+    if (out_msg_reject == true)
+		oss << "n";
+    if (moderated_channel == true)
+		oss << "m";
+    if (channel_max_users != -1)
+		oss << "l";
 	if (channel_key != "")
-		response += "k";
+		oss << "k";
 
-    return response;
+    if (channel_max_users != -1)
+		oss << " " << channel_max_users;
+	if (channel_key != "")
+		oss << " " << channel_key;
+
+    return oss.str();
+}
+
+bool Channel::GetIfFull( void )
+{
+    if (channel_max_users == -1)
+        return false;
+    if (channel_max_users < client_sd_list.size())
+        return false;
+    return true;
 }
 
 bool    Channel::GetP_Flag( void )

@@ -22,6 +22,8 @@ Server::Server( void )
 	command_map["NICK"] = &Server::Command_nick;
 	command_map["USER"] = &Server::Command_user;
 
+	command_map["OPER"] = &Server::Command_oper;
+
 	command_map["JOIN"] = &Server::Command_join;
 	command_map["PART"] = &Server::Command_part;
 	command_map["LIST"] = &Server::Command_list;

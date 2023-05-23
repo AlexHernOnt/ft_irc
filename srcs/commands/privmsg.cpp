@@ -60,7 +60,17 @@ void Server::Command_privmsg( int client_sd, std::string data )
     {
         if (CheckChannelName(split_targets[i]) == true)
         {
-            //TODO: el mensaje no se puede enviar al canal
+            if (
+                (channels_list[split_targets[i]].GetN_Flag() == true && channels_list[split_targets[i]].GetIfClientInChannel(client_sd) == false) ||
+                (channels_list[split_targets[i]].GetM_Flag() == true && channels_list[split_targets[i]].GetIfClientCanSpeak(client_sd) == false)
+            )
+            {
+                oss << split_inputs[1] << " :Cannot send to channel";
+                ServerMsgToClient(client_sd, "404", oss.str());
+                oss.str("");
+                oss.clear();
+                continue;
+            }
             oss << "PRIVMSG " << split_targets[i] << " :" << msg;
             SendClientMsgToChannel(client_sd, oss.str(), split_targets[i], false);
             oss.str("");

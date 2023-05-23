@@ -95,11 +95,4 @@ void Server::Command_topic( int client_sd, std::string data )
             return ;
         }
     }
-
-    //TODO: cuando se pone como TOPIC : se esta pidiendo el tópico el cual devuelve 
-    //                                      331 RPL_NOTOPIC "<channel> :No topic is set"
-    //                                      o
-    //                                      332 RPL_TOPIC "<channel> :<topic>"
-    //TODO: cuando se pone como TOPIC :<tópico> se está intentando cambiar el tópico (concepto)
-    //                                      El canal puede tener una restricción para que solo operadores puedan cambiar
 }

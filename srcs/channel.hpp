@@ -33,6 +33,7 @@ class Channel {
         void RemoveBanMask( std::string mask );
         void AllowUserMsg( int client_sd );
         void DeclineUserMsg( int client_sd );
+        bool GetIfFull( void );
         
 
         std::string GetChannelFlags( void );

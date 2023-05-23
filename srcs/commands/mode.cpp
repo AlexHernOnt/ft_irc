@@ -12,7 +12,6 @@
 
 #include "../server.hpp"
 
-//TODO
 void Server::Command_mode( int client_sd, std::string data )
 {
     std::cout << "ENTRA AL MODE EL CLIENTE: " << client_list[client_sd].nick << " CON LOS SIGUIENTES DATOS: " << data << std::endl;
@@ -53,7 +52,6 @@ void Server::Command_mode( int client_sd, std::string data )
         //mode channel
         if (split_inputs.size() == 2)
         {
-            //TODO: get info
             oss << split_inputs[1] << " " << channel->second.GetChannelFlags();;
             ServerMsgToClient(client_sd, "324", oss.str());
             oss.str("");
@@ -71,19 +69,18 @@ void Server::Command_mode( int client_sd, std::string data )
                 oss.clear();
                 return;
             }
-            //TODO
             /*
                 o - give/take channel operator privileges; X
-                p - private channel flag; X
-                s - secret channel flag; X
-                i - invite-only channel flag; X
-                t - topic settable by channel operator only flag; X
-                n - no messages to channel from clients on the outside; X
-                m - moderated channel; X
-                l - set the user limit to channel; X
-                b - set a ban mask to keep users out; X
-                v - give/take the ability to speak on a moderated channel; X
-                k - set a channel key (password). X
+                p - private channel flag;
+                s - secret channel flag;
+                i - invite-only channel flag;
+                t - topic settable by channel operator only flag;
+                n - no messages to channel from clients on the outside;
+                m - moderated channel;
+                l - set the user limit to channel;
+                b - set a ban mask to keep users out;
+                v - give/take the ability to speak on a moderated channel;
+                k - set a channel key (password).
             */
             //add flags
             unsigned long propertyIndex = 3;
@@ -189,11 +186,10 @@ void Server::Command_mode( int client_sd, std::string data )
                 }
                 else if (split_inputs[2][i] == 'k')
                 {
+                    if (channels_list[split_inputs[1]].)
                     channels_list[split_inputs[1]].SetKey(split_inputs[propertyIndex]);
                     propertyIndex++;
                 }
-                    
-                //faltan las flags
                 else
                 {
                     oss << split_inputs[2][i] << " :is unknown mode char to me";
@@ -222,6 +218,7 @@ void Server::Command_mode( int client_sd, std::string data )
 
         if (split_inputs.size() == 2)
         {
+            //get
             oss << GetUserFlags(client_sd);
             ServerMsgToClient(client_sd, "221", oss.str());
             oss.str("");
@@ -234,10 +231,4 @@ void Server::Command_mode( int client_sd, std::string data )
             ProcessClientFlags(client_sd, split_inputs[2]);
         }
     }
-
-    /*
-        ERR_CHANOPRIVSNEEDED            ERR_NOSUCHNICK
-        ERR_NOTONCHANNEL                ERR_KEYSET
-        RPL_BANLIST                     RPL_ENDOFBANLIST
-    */
 }
