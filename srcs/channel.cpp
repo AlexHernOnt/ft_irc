@@ -6,7 +6,7 @@
 /*   By: rgirondo <rgirondo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/05/21 23:04:19 by rgirondo         ###   ########.fr       */
+/*   Updated: 2023/05/23 20:05:01 by rgirondo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -323,4 +323,14 @@ void    Channel::SetM_Flag( bool M )
 void    Channel::SetL_Flag( int max )
 {
     this->channel_max_users = max;
+}
+
+void Channel::SendInvitation ( int client_sd )
+{
+    for (size_t it = 0; it < invited_clients_sd.size(); it++)
+    {
+        if (invited_clients_sd[it] == client_sd)
+            return ;
+    }
+    invited_clients_sd.push_back(client_sd);
 }
