@@ -120,6 +120,10 @@ void Server::WelcomeClient( int client_sd )
 	oss.str("");
 	oss.clear();
 
+	oss << ":" << client_list[client_sd].nick << " MODE " << client_list[client_sd].nick << " :" << GetUserFlags(client_sd) << std::endl;
+	OtherMsgToClient(client_sd, oss.str());
+	oss.str("");
+	oss.clear();
 	/*
 	:albatrosstrosst MODE albatrosstrosst :+i
 	*/

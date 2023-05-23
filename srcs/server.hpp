@@ -23,7 +23,7 @@
 
 #define HOST_NAME           "irc.ciudadreal.com"
 
-#define DEFAULT_PASSWORD	"1234" 
+#define DEFAULT_PASSWORD	"" 
 #define DEFAULT_PORT	    6667 
 #define MAX_CLIENTS         30
 
