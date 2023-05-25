@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahernand <ahernand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rgirondo <rgirondo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/05/06 17:29:14 by ahernand         ###   ########.fr       */
+/*   Updated: 2023/05/25 20:00:20 by rgirondo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,6 +258,8 @@ void Server::ProcessCommand( int client_sd, std::string line )
 {
 	std::string command = line.substr(0, line.find(' '));
 
+	/*if (line[line.size() - 1] == '\r') //condicion en caso de que el cliente pase la linea con un \r al final
+		line.pop_back();*/
 	if (command_map.count(command))
 	{
 		CommFunct func = command_map[command];
@@ -308,14 +310,15 @@ std::vector<std::string> Server::Split( std::string data, std::string delimiter,
 
     while (true)
     {
-		pos = data.find(delimiter, pos);
-        std::string substring( data.substr(prev_pos, pos - prev_pos) );
+		std::string::size_type pos3 = data.find(delimiter, pos);
 		if (delimiter2 != "")
 		{
 			std::string::size_type pos2 = data.find(delimiter2, pos);
-			if (pos2 < pos)
-				pos = pos2;
+			if (pos2 < pos3)
+				pos3 = pos2;
 		}
+		pos = pos3;
+		std::string substring( data.substr(prev_pos, pos - prev_pos) );
 		//std::cout << substring << " " << substring.size() << std::endl;
 		if (substring != "")
         	split_inputs.push_back(substring);
