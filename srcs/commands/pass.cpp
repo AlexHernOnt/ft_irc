@@ -41,6 +41,8 @@ void Server::Command_pass( int client_sd, std::string data )
 		ServerMsgToClient(client_sd, "464", oss.str());
 		oss.str("");
 		oss.clear();*/
+		std::cout << "PRIMERO " << split_inputs[0] << std::endl;
+		std::cout << "COMPARA " << split_inputs[1] << "/" << password << std::endl;
 		return;
 	}
     //ok continuar

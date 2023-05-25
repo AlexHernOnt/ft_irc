@@ -97,6 +97,8 @@ void Server::Command_mode( int client_sd, std::string data )
                 }
                 else if (split_inputs[2][i] == 'o')
                 {
+                    if (propertyIndex >= split_inputs.size())
+                        continue;
                     int target_client_sd = GetClientSdByNick(split_inputs[propertyIndex]);
                     if (target_client_sd == -1)
                     {
@@ -137,6 +139,8 @@ void Server::Command_mode( int client_sd, std::string data )
                     channels_list[split_inputs[1]].SetM_Flag(sign);
                 else if (split_inputs[2][i] == 'l')
                 {
+                    if (propertyIndex >= split_inputs.size())
+                        continue;
                     channels_list[split_inputs[1]].SetL_Flag(std::stoi(split_inputs[propertyIndex]));
                     propertyIndex++;
                 }
@@ -175,6 +179,8 @@ void Server::Command_mode( int client_sd, std::string data )
                 }
                 else if (split_inputs[2][i] == 'v')
                 {
+                    if (propertyIndex >= split_inputs.size())
+                        continue;
                     int target_client_sd = GetClientSdByNick(split_inputs[propertyIndex]);
                     if (target_client_sd != -1)
                     {
@@ -186,6 +192,8 @@ void Server::Command_mode( int client_sd, std::string data )
                 }
                 else if (split_inputs[2][i] == 'k')
                 {
+                    if (propertyIndex >= split_inputs.size())
+                        continue;
                     channels_list[split_inputs[1]].SetKey(split_inputs[propertyIndex]);
                     propertyIndex++;
                 }

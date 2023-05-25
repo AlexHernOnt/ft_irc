@@ -14,8 +14,6 @@
 
 Server::Server( void )
 {
-	password = DEFAULT_PASSWORD;
-	port = DEFAULT_PORT;
 	nfds = 1;
 
 	command_map["PASS"] = &Server::Command_pass;
@@ -45,6 +43,12 @@ Server::~Server( void )
 Server::Server( const Server& other )
 {
     *this = other;
+}
+
+void Server::SetServerData( std::string password, int port )
+{
+	this->password = password;
+	this->port = port;
 }
 
 void Server::ServerSocketSetup( void )

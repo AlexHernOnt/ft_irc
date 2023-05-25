@@ -12,9 +12,22 @@
 
 #include "server.hpp"
 
-int main(/*int argc , char *argv[]*/)  
+int main(int argc , char *argv[])  
 {  
-	Server								server;
+	Server	server;
+	int		point = 1;
+
+	if (argc < 3)
+	{
+		std::cout << "Insuficent params" << std::endl;
+		std::cout << "Params: [host:port_network:password_network UNUSED] <port> <password>" << std::endl;
+		return 1;
+	}
+
+	if (argc >= 4)
+		point++;
+		
+	server.SetServerData( argv[point + 1], std::stoi(argv[point]) );
 
     server.ServerSocketSetup();
 

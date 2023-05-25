@@ -23,8 +23,6 @@
 
 #define HOST_NAME           "irc.ciudadreal.com"
 
-#define DEFAULT_PASSWORD	"" 
-#define DEFAULT_PORT	    6667 
 #define MAX_CLIENTS         30
 
 #define OPR_USER            "admin"
@@ -67,6 +65,8 @@ class Server {
         Server( void );
         ~Server( void );
         Server( const Server& other );
+
+        void SetServerData( std::string password, int port );
 
         //setup
         void ServerSocketSetup( void );
