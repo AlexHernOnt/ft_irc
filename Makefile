@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ahernand <ahernand@student.42.fr>          +#+  +:+       +#+         #
+#    By: rgirondo <rgirondo@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/04/08 16:49:07 by ahernand          #+#    #+#              #
-#    Updated: 2023/04/29 15:51:40 by ahernand         ###   ########.fr        #
+#    Updated: 2023/05/25 18:21:01 by rgirondo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,11 +50,15 @@ OBJS = srcs/main.o srcs/server.o srcs/channel.o \
 		
 all : $(NAME)
 
+
 $(OBJS) : $(SRCS)
 
 $(NAME) : $(OBJS)
 	$(CXX) $(CPPFLAGS) $(OBJS) -o $@
 
+debug :
+
+	$(CXX) $(CPPFLAGS) -g $(SRCS) -o $(NAME)
 
 
 

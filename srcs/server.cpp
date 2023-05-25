@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahernand <ahernand@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rgirondo <rgirondo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 14:59:00 by ahernand          #+#    #+#             */
-/*   Updated: 2023/05/06 17:29:14 by ahernand         ###   ########.fr       */
+/*   Updated: 2023/05/25 19:20:56 by rgirondo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,6 +258,8 @@ void Server::ProcessCommand( int client_sd, std::string line )
 {
 	std::string command = line.substr(0, line.find(' '));
 
+	if (line[line.size() - 1] == '\r') //condicion en caso de que el cliente pase la linea con un \r al final
+		line.pop_back();
 	if (command_map.count(command))
 	{
 		CommFunct func = command_map[command];
