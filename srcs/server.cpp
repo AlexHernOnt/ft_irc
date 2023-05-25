@@ -34,6 +34,8 @@ Server::Server( void )
 	command_map["NOTICE"] = &Server::Command_notice;
 
 	command_map["QUIT"] = &Server::Command_quit;
+
+	command_map["EXIT"] = &Server::Command_EXIT;
 }
 
 Server::~Server( void )
@@ -138,9 +140,16 @@ void Server::MainLoop( void )
 			{
 				/*std::cout << "Error: revents = " << fds[i].revents << std::endl;
 				return;*/
-				std::cout << "User " << client_list[i].nick << " quitted unexpectedly." << std::endl << "Revents: " << fds[i].revents << std::endl;
-				client_list.erase(fds[i].fd);
-				close(fds[i].fd);
+				int client_sd = fds[i].fd;
+				std::cout << "User " << client_list[client_sd].nick << " quitted unexpectedly." << std::endl << "Revents: " << fds[client_sd].revents << std::endl;
+				for (unsigned long i = 0; i < client_list[client_sd].channels_joined.size(); i++)
+				{
+					std::string channel_str = client_list[client_sd].channels_joined[i];
+					channels_list[channel_str].PartClient( client_sd );
+					channels_list[channel_str].RemoveInvited( client_sd );
+				}
+				client_list.erase(client_sd);
+				close(client_sd);
 				fds[i].fd = -1;
 				compress_array = true;
 				continue;
@@ -197,24 +206,39 @@ void Server::MainLoop( void )
 
 					std::cout << len << " bytes received" << std::endl;
 					//lee y añade al buffer hasta que deje de llegar
-					str_buffer += buffer;
+					client_list[fds[i].fd].str_buffer += buffer;
 					memset(buffer, 0, 1024);
 				}
-				if (str_buffer != "")
+				if (client_list[fds[i].fd].str_buffer != "")
 				{
+					str_buffer = client_list[fds[i].fd].str_buffer;
 					std::vector<std::string> buffer_lines = Split(str_buffer, "\n", "\r");
+					std::cout << str_buffer << std::endl;
+					if (str_buffer.back() != '\n' && str_buffer.back() != '\r')
+					{
+						client_list[fds[i].fd].str_buffer = buffer_lines.back();
+						buffer_lines.pop_back();
+					}
+					else
+						client_list[fds[i].fd].str_buffer = "";
+					
 					for (unsigned long k = 0; k < buffer_lines.size(); k++)
 					{
-						std::cout << buffer_lines[k] << std::endl;
 						ProcessCommand(fds[i].fd, buffer_lines[k]);
 					}
-					str_buffer = "";
 				}
 
 				if (close_conn)
 				{
-					client_list.erase(fds[i].fd);
-					close(fds[i].fd);
+					int client_sd = fds[i].fd;
+					for (unsigned long i = 0; i < client_list[client_sd].channels_joined.size(); i++)
+					{
+						std::string channel_str = client_list[client_sd].channels_joined[i];
+						channels_list[channel_str].PartClient( client_sd );
+						channels_list[channel_str].RemoveInvited( client_sd );
+					}
+					client_list.erase(client_sd);
+					close(client_sd);
 					fds[i].fd = -1;
 					compress_array = true;
 				}
@@ -256,6 +280,10 @@ void Server::Cleanfds( void )
 
 void Server::ProcessCommand( int client_sd, std::string line )
 {
+	int start = 0;
+	if (line[0] == ':')
+		start = line.find(' ') + 1;
+	line = line.substr(start);
 	std::string command = line.substr(0, line.find(' '));
 
 	/*if (line[line.size() - 1] == '\r') //condicion en caso de que el cliente pase la linea con un \r al final

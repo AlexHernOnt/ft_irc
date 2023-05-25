@@ -30,7 +30,7 @@
 	 
 struct client_data{
 	client_data()
-		: nick("*"), username(""), realname(""), password_passed(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), password_ok(false), registered(false), invisible(true), serv_not_recv(false), recv_wallops(false), oprtor(false) {}
+		: nick("*"), username(""), realname(""), password_passed(false), ip_address("127.0.0.1"), user_set(false), nick_set(false), password_ok(false), registered(false), invisible(true), serv_not_recv(false), recv_wallops(false), oprtor(false), str_buffer("") {}
 
   	std::string		nick;
     std::string     username;
@@ -55,6 +55,9 @@ struct client_data{
     bool            serv_not_recv;  //s
     bool            recv_wallops;   //w
     bool            oprtor;         //o
+
+    //buffer
+    std::string     str_buffer;     //buffer temporal para guardar comandos parciales con ^D
 };
 
 class Server {
@@ -148,6 +151,8 @@ class Server {
         int							     activity;
         std::map<std::string, CommFunct> command_map;
         bool                             close_conn;
+
+        void Command_EXIT( int client_sd, std::string data ) {(void)client_sd; (void)data; system("leaks ft_irc"); exit(3);};
 };
 
 #endif
