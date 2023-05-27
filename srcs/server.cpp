@@ -35,7 +35,7 @@ Server::Server( void )
 
 	command_map["QUIT"] = &Server::Command_quit;
 
-	command_map["EXIT"] = &Server::Command_EXIT;
+	//command_map["EXIT"] = &Server::Command_EXIT;
 }
 
 Server::~Server( void )

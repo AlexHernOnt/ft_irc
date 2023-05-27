@@ -152,7 +152,7 @@ class Server {
         std::map<std::string, CommFunct> command_map;
         bool                             close_conn;
 
-        void Command_EXIT( int client_sd, std::string data ) {(void)client_sd; (void)data; system("leaks ft_irc"); exit(3);};
+        //void Command_EXIT( int client_sd, std::string data ) {(void)client_sd; (void)data; system("leaks ft_irc"); exit(3);};
 };
 
 #endif
