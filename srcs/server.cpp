@@ -116,6 +116,7 @@ void Server::MainLoop( void )
 	
 	int    current_size = 0;
 
+	memset(buffer, 0, 1024);
 	while (true)
 	{
 		std::cout << "Waiting on poll()..." << std::endl;
