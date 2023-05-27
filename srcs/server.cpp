@@ -61,7 +61,7 @@ void Server::ServerSocketSetup( void )
 	if ((master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0)
 	{  
 		std::perror("socket() failed");  
-		exit(EXIT_FAILURE);  
+		exit(EXIT_FAILURE);
 	}  
 
 	// Set master socket to allow multiple connections , 
@@ -73,6 +73,7 @@ void Server::ServerSocketSetup( void )
 		std::exit(EXIT_FAILURE);
 	}
 
+	//non-blocking socket (no espera a la respuesta)
 	if ((rc = fcntl(master_socket, F_SETFL, O_NONBLOCK)) < 0)
 	{
 		perror("fcntl() failed");
@@ -81,18 +82,18 @@ void Server::ServerSocketSetup( void )
 	}
 
 	// Type of socket created
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(port);
+	address.sin_family = AF_INET;			//AF_INET = ipv4, AF_INET6 = ipv6
+	address.sin_addr.s_addr = INADDR_ANY;	//IP (localhost, básicamente)
+	address.sin_port = htons(port);			//puerto
 
-	// Bind the socket to localhost port 6667
+	// Bind the socket to localhost + port
 	if ((rc = bind(master_socket, (struct sockaddr *)&address, sizeof(address))) < 0)
 	{
 		perror("bind failed");
 		exit(EXIT_FAILURE);
 	}
 
-	// Ttry to specify maximum of MAX_CLIENTS pending connections for the master socket
+	// Try to specify maximum of MAX_CLIENTS pending connections for the master socket
 	if (listen(master_socket, MAX_CLIENTS) < 0)
 	{
 		perror("listen() failed");
@@ -141,7 +142,7 @@ void Server::MainLoop( void )
 				/*std::cout << "Error: revents = " << fds[i].revents << std::endl;
 				return;*/
 				int client_sd = fds[i].fd;
-				std::cout << "User " << client_list[client_sd].nick << " quitted unexpectedly." << std::endl << "Revents: " << fds[client_sd].revents << std::endl;
+				std::cout << "User " << client_list[client_sd].nick << " quitted unexpectedly." << std::endl << "Revents: " << fds[i].revents << std::endl;
 				for (unsigned long i = 0; i < client_list[client_sd].channels_joined.size(); i++)
 				{
 					std::string channel_str = client_list[client_sd].channels_joined[i];
@@ -197,6 +198,7 @@ void Server::MainLoop( void )
 						break;
 					}
 
+					//no he conseguido que esto se dispare
 					if (len == 0)
 					{
 						std::cout << "Connection closed" << std::endl;
@@ -209,6 +211,7 @@ void Server::MainLoop( void )
 					client_list[fds[i].fd].str_buffer += buffer;
 					memset(buffer, 0, 1024);
 				}
+				//si el cliente tiene buffer
 				if (client_list[fds[i].fd].str_buffer != "")
 				{
 					str_buffer = client_list[fds[i].fd].str_buffer;

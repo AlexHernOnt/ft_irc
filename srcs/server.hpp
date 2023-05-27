@@ -147,8 +147,6 @@ class Server {
         std::map<std::string, Channel>  channels_list; // 1: nombre del canal 2: client_sd asociados
 
         //others
-        int                              max_sd;
-        int							     activity;
         std::map<std::string, CommFunct> command_map;
         bool                             close_conn;
 

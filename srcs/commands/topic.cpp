@@ -55,7 +55,7 @@ void Server::Command_topic( int client_sd, std::string data )
                 oss.clear();
                 return ;
             }
-            if (split_inputs.size() > 2 && ((ch_it->second).GetT_Flag() || (ch_it->second).GetIfClientOperator(client_sd)))
+            if (split_inputs.size() > 2 && ((ch_it->second).GetT_Flag() == false || (ch_it->second).GetIfClientOperator(client_sd)))
                 (ch_it->second).SetChannelConcept(msg);
             else if (split_inputs.size() > 2) // no operator priv ERR_CHANOPRIVSNEEDED
             {

@@ -16,6 +16,7 @@ int main(int argc , char *argv[])
 {  
 	Server	server;
 	int		point = 1;
+	int		aux_port;
 
 	if (argc < 3)
 	{
@@ -26,8 +27,18 @@ int main(int argc , char *argv[])
 
 	if (argc >= 4)
 		point++;
+
+	try
+	{
+		aux_port = std::stoi(argv[point]);
+	}
+	catch(std::exception &err)
+	{
+		std::cout << "Port is not a number." << std::endl;
+		return 1;
+	}
 		
-	server.SetServerData( argv[point + 1], std::stoi(argv[point]) );
+	server.SetServerData( argv[point + 1], aux_port );
 
     server.ServerSocketSetup();
 

@@ -55,7 +55,21 @@ void Server::Command_join( int client_sd, std::string data )
             continue;
         }
 
-        client_list[client_sd].channels_joined.push_back(channels[i]);
+        for (unsigned long j = 0; j < client_list[client_sd].channels_joined.size(); j++)
+        {
+            if (client_list[client_sd].channels_joined[j] == channels[i])
+                return;
+        }
+
+        if (client_list[client_sd].channels_joined.size() >= 10)
+        {
+            oss << channels[i] << " :You have joined too many \\ channels";
+            ServerMsgToClient(client_sd, "405", oss.str());
+            oss.str("");
+            oss.clear();
+            return;
+        }
+
         it = channels_list.find(channels[i]);
         if (it == channels_list.end()) //crear nuevo si no existe
         {
@@ -80,7 +94,7 @@ void Server::Command_join( int client_sd, std::string data )
 
         if (it->second.GetIfNickBanned( client_list[client_sd].nick ) == true)
         {
-            oss << split_inputs[1] << " :Cannot join channel (+b)";
+            oss << channels[i] << " :Cannot join channel (+b)";
             ServerMsgToClient(client_sd, "474", oss.str());
             oss.str("");
             oss.clear();
@@ -89,7 +103,7 @@ void Server::Command_join( int client_sd, std::string data )
         
         if (it->second.GetIfFull() == true)
         {
-            oss << split_inputs[1] << " :Cannot join channel (+l)";
+            oss << channels[i] << " :Cannot join channel (+l)";
             ServerMsgToClient(client_sd, "471", oss.str());
             oss.str("");
             oss.clear();
@@ -98,12 +112,13 @@ void Server::Command_join( int client_sd, std::string data )
 
         if (it->second.GetI_Flag() == true && it->second.GetIfClientInvited(client_sd) == false)
         {
-            oss << split_inputs[1] << " :Cannot join channel (+i)";
+            oss << channels[i] << " :Cannot join channel (+i)";
             ServerMsgToClient(client_sd, "473", oss.str());
             oss.str("");
             oss.clear();
             return;
         }
+        client_list[client_sd].channels_joined.push_back(channels[i]);
         it->second.JoinClient( client_sd, false );
 
         //aviso JOIN a todos los del canal
